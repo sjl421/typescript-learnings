@@ -5,7 +5,8 @@
     "main": "/dist/main.js",
     "scripts": {
         "start": "gulp &&node dist/main.js",
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "git-push": "./push.sh"
     },
     "repository": {
         "type": "git",
@@ -24,6 +25,7 @@
         "browserify": "^14.5.0",
         "gulp": "^3.9.1",
         "gulp-typescript": "^3.2.3",
+        "live-server": "^1.2.0",
         "tsify": "^3.0.3",
         "typescript": "^2.6.2",
         "vinyl-source-stream": "^1.1.0"

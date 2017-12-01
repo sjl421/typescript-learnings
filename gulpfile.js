@@ -7,11 +7,11 @@ const gulp = require('gulp'),
       };
 
 gulp.task("copy-html", ()=>{
-    return gulp.src(path.pages)
+    return gulp.src(paths.pages)
         .pipe(gulp.dest("dist"))
 });
 
-gulp.task('defaults', ['copy-html'], ()=>{
+gulp.task('default', ['copy-html'], ()=>{
     return browserify({
         basedir: '.',
         debug: true,
@@ -22,5 +22,5 @@ gulp.task('defaults', ['copy-html'], ()=>{
     .plugin(tsify)
     .bundle()
     .pipe(source('bundle.js'))
-    .pip(gulp.dest('dist'));
+    .pipe(gulp.dest('dist'));
 });
