@@ -53,7 +53,7 @@ TypeScript的许多优势，带来了一种好得多的app开发体验。因此�
 
 支付宝：
 
-![Alipay: laxer@gmail.com](img/a6x09981lks9yco3b8xcqf0.png "alipay:laxers@gmail.com")
+![Alipay: laxer@gmail.com](images/a6x09981lks9yco3b8xcqf0.png "alipay:laxers@gmail.com")
 
 Bitcoin:
 
