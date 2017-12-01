@@ -19,7 +19,7 @@ ES6只是新一代Javascript的规范，几大公司、各个浏览器引擎等�
 
 ## 关于TypeScript
 
-TypeScript是Javascript的超级，有着以下优势：
+TypeScript是Javascript的超集，有着以下优势：
 
 - 可选的静态类型（关键就是这里的“可选”, Optional static typing, the key here is optional）
 - 类型推理，此特性在并没有使用到类型的情况下，带来那些类型的诸多益处（Type Inference, which gives some of the benefits of types, without actually using them）
