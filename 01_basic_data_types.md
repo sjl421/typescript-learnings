@@ -60,4 +60,21 @@ let list: number[] = [1, 2, 3, 4];
 let list: Array<number> = [1, 2, 3, 4];
 ```
 
+> 与Python中清单的比较： Python清单中的元素，不要求类型一致，且因此认为Python在数据结构上更具灵活性。Python清单有`pop()`、`append()`等方法，TypeScript要求数组元素类型以致（比如强行将不一致的元素push到数组上，其编译器就会报错），则有`push()`与`pop()`方法
+
+
+## 元组（Tuple）
+
+TypeScript中的元组，允许表示一个**已知元素数量与类型**的数组，这些元素的类型不要求一致。比如，可定义一对值分别为`string`与`number`类型的元组。
+
+```typescript
+// 声明一个元组类型
+let x: [string, number];
+
+// 对其进行初始化
+x = ['weight', 181];
+
+// 错误的初始化
+x = [181, 'weight'];
+```
 

@@ -20,6 +20,9 @@ let
     // 数组，Array。注意：下面是数组的两种写法
     list: string[] = ['Peng Hailin', 'Have a good day!'],
     points: Array<number> = [5, 3.14159, -0.58];
+
+points.push('test');
+points.pop();
     
 points.forEach((p)=>{
     sentence = sentence.concat(` ${p.toString()}`);
