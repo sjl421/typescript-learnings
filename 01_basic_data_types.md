@@ -60,7 +60,7 @@ let list: number[] = [1, 2, 3, 4];
 let list: Array<number> = [1, 2, 3, 4];
 ```
 
-> 与Python中清单的比较： Python清单中的元素，不要求类型一致，且因此认为Python在数据结构上更具灵活性。Python清单有`pop()`、`append()`等方法，TypeScript要求数组元素类型以致（比如强行将不一致的元素push到数组上，其编译器就会报错），则有`push()`与`pop()`方法。它们都是使用`[]`符号。
+> 与Python中清单的比较： Python清单中的元素，不要求类型一致，且因此认为Python在数据结构上更具灵活性。Python清单有`pop()`、`append()`等方法，TypeScript要求数组元素类型一致（比如强行将不一致的元素push到数组上，其编译器就会报错），则有`push()`与`pop()`方法。它们都是使用`[]`符号。
 
 
 ## 元组（Tuple）
@@ -179,4 +179,43 @@ let unusable: void = undefined;
 
 ## `null` 与 `undefined`
 
+TypeScript中的值`undefined`与`null`都有各自的类型，分别叫`undefined`与`null`。它们与`void`类似，各自用处都不大：
+
+```typescript
+let u: undefined = undefined;
+let n: null = null;
+```
+
+默认所有其它类型，都用着子类型`undefined`与`null`。也就是说，可将`null`与`undefined`赋值给`number`、`string`、`list`、`tuple`、`void`等类型。
+
+但在指定了编译器（tsc, typescript compiler）选项`--strictNullChecks`时，`null`与`undefined`就只能赋值给`void`以及它们自己了。这能避免**很多**常见的问题。比如在某处计划传入一个`string`或`null`或`undefined`的参数，那么就可使用`string | null | undefined`的**联合类型**。
+
+> 注意：TypeScript最佳实践是开启`--strictNullChecks`选项，但现阶段假设此选项是关闭的。
+
+
+## `never`类型
+
+类型`never`表示一些永不存在的值的类型。比如，可将那些总是会抛出异常，或根本不会有返回值的函数表达式、箭头函数表达式的返回值设置为`never`类型；一些变量也可以是`never`类型，仅当它们受永不为真的**类型保护**约束时。
+
+以下是一些返回`never`类型的函数：
+
+```typescript
+// 返回`never`的函数，必须存在无法到达的终点（return?）
+function error(message: string): never {
+    throw new Error (message);
+}
+
+// 推断的返回值类型为never
+function fail () {
+    return error('Somthing failed')
+}
+
+// 返回`never`的函数，必须存在无法到达的终点
+
+function infiniteLoop (): never {
+    while(true) {
+    
+    }
+}
+```
 

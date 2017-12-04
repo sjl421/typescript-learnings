@@ -64,12 +64,36 @@ let prettySure: Object = 4;
 prettySure.toFixed();
 
 
-// 空值，avoid
+// 空值，void
 
-function warnUser(): avoid {
+function warnUser(): void {
     alert('This is my warning message.');
 }
 
+// undefined 与 null
+let u: undefined = undefined;
+let n: null = null;
+
+let pi: number = undefined;
+console.log(pi);
+
+// never 类型
+function error(message: string): never {
+    throw new Error(message);
+}
+
+function fail () {
+    return error('Something failed');
+}
+
+function infiniteLoop(): never {
+    while(true) {
+    
+    }
+}
+
+//fail();
+//infiniteLoop();
 
 showHello("greeting", sentence);
 
