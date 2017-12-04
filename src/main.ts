@@ -1,19 +1,7 @@
 'use strict';
 
-function f () {
-    var a = 10;
-
-    a = 2;
-
-    var b = g ();
-
-    a = 3;
-
-    return b;
-
-    function g () {
-        return a;
-    }
+for (var i = 0; i < 10; i++){
+    setTimeout(function (){
+        console.log(i);
+    }, 100 * i);
 }
-
-console.log(f());
