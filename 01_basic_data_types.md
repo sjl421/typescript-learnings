@@ -241,3 +241,4 @@ let strLength: number = (someValue as string).length;
 
 ## 深入理解`let`
 
+在上面的示例中，TypeScript的`let`关键字取代了JavaScript中的`var`关键字。JavaScript版本ES6（ECMAScript 2015）带来了新的`let`关键字，TypeScript进行了实现。Javascript原来的很多问题，都可以通过使用`let`加以解决，所以尽可能的使用`let`来代替`var`了。
