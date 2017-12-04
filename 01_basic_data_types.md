@@ -221,7 +221,7 @@ function infiniteLoop (): never {
 
 ## 类型的断言（Type Assertion）
 
-可能会遇到这样的情况，相比TypeScript（编译器），Coder更有把握了解某个值的类型。也就是说Coder清楚地了解某个实体有着比它现有类型（`any`/`undefined`/`null`等）更具体的类型。
+可能会遇到这样的情况，相比TypeScript（编译器），Coder更有把握了解某个值的类型。也就是说Coder清楚地了解某个实体（entity, 与变量名称所对应的内存单元）有着比它现有类型（`any`/`undefined`/`null`等）更具体的类型。
 
 那么此时就可以通过**类型断言**，告诉编译器“相信我，我知道自己在干什么”，从而对编译进行干预。类型断言相当于其它语言中的类型转换，只是不进行特殊的数据检查与结构（destructure）。其对运行时没有影响，尽在编译阶段起作用。TypeScript会假设Coder已进行了必要的检查。
 
