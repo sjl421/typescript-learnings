@@ -152,3 +152,21 @@ for (var i = 0; i < 10; i++){
 `setTimeout`在若干毫秒后执行一个函数，而且是在`for`循环结束后。在`for`循环结束后，`i`的值就成为`10`。这就是作为`setTimeout`的第一个参数的函数在调用时，每次都输出`10`的原因。
 
 作为解决此问题的一种方法，就是使用立即执行的函数表达式（Immediately Invoked Function Expression, IIFE, [参考链接](https://segmentfault.com/a/1190000003985390)）。
+
+```javascript
+for (var i = 0; i < 10; i++){
+    // 这里要捕获到变量`i`的当前状态
+    // 是通过触发带有其当前值的一个函数实现的
+    (function(i){ 
+        setTimeout(function (){
+            console.log(i);
+        }, 100 * i)
+    })(i);
+}
+```
+
+其实对于这种奇怪的形式，我们都已司空见惯了。立即执行函数中的参数`i`，会覆盖`for`循环中的`i`，但因为使用相同的名称`i`，所以都不用怎么修改`for`循环体内部的代码。
+
+## 关于全新的`let`声明方式
+
+
