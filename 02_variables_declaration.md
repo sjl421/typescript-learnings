@@ -1,6 +1,6 @@
 # 变量的声明，Variables Declaration
 
-`let`与`const`是较新一版JavaScript(ES6)中变量声明的方式。前一部分提到，`let`在很多方面与`var`是相似的，单`let`却可以帮助大家解决JavaScript中的一些常见问题。`const`是对`let`的一个增强，可阻止对经其修饰的变量的再次赋值。
+`let`与`const`是较新一版JavaScript(ES6)中变量声明的方式。前一部分提到，`let`在很多方面与`var`是相似的，但`let`却可以帮助大家解决JavaScript中的一些常见问题。`const`是对`let`的一个增强，可阻止对经其修饰的变量的再次赋值。
 
 因为TypeScript是JavaScript的超集(super-set)，所以自然有对JavaScript所有特性的支持，`let`与`const`关键字也不例外。以下将详细讨论这些全新的声明方式，以及为何要用它们来取代`var`的原因。
 
@@ -115,7 +115,7 @@ for (var i = 0; i < 10; i++){
 }
 ```
 
-这里的`setTimeout`会在若干毫秒的延时后执行一个函数（等待其它代码执行完毕）。
+对于那些尚不熟悉的Coder，要知道这里的`setTimeout`会在若干毫秒的延时后尝试执行一个函数（因此要等待其它所有代码执行停止）。
 
 结果就是：
 
@@ -132,7 +132,7 @@ for (var i = 0; i < 10; i++){
 10
 ```
 
-有经验的JavaScript程序员对此已经很熟悉了，但如果不能理解，也不是一个人。大多数人都期望得到这样的结果：
+很多有经验的JavaScript程序员对此已经很熟悉了，但如被输出吓到了，也不是你一个人。大多数人都期望得到这样的结果：
 
 ```bash
 0
@@ -149,7 +149,7 @@ for (var i = 0; i < 10; i++){
 
 参考上面提到的捕获变量（Capturing Variables），传递给`setTimeout`的每一个函数表达式，实际上都引用了相同作用域中的同一个`i`。
 
-`setTimeout`在若干毫秒后执行一个函数，而且是在`for`循环结束后。在`for`循环结束后，`i`的值就成为`10`。这就是作为`setTimeout`的第一个参数的函数在调用时，每次都输出`10`的原因。
+这里有必要花个一分钟来思考一下那意味着什么。`setTimeout`将在若干毫秒后运行一个函数，*但只是*在`for`循环已停止执行后。随着`for`循环的停止执行，`i`的值就成为`10`。这就是作为`setTimeout`的第一个参数的函数在调用时，每次都输出`10`的原因。
 
 作为解决此问题的一种方法，就是使用立即执行的函数表达式（Immediately Invoked Function Expression, IIFE, [参考链接](https://segmentfault.com/a/1190000003985390)）。
 
@@ -358,5 +358,207 @@ for (let i = 0; i < 10; i++) {
 8
 9
 ```
+
+## 关于`const`式的声明
+
+`const`式声明是声明变量的另一种方式。
+
+```typescript
+const numLivesForCat = 9;
+```
+
+此类声明与`let`声明相似，但如同它们的名称一样，经由`const`修饰的变量的值，一旦被绑定，就不能加以改变了。也就是说，这些变量与`let`式声明有着相同的作用域，但不能对其进行再度赋值。
+
+注意不要与所谓某些所引用的值*不可修改（immutable）*之概念搞混（经`const`修饰变量与那些不可修改值并不是一个东西）。
+
+```typescript
+const numLivesForCat = 9;
+
+const kitty = {
+    name: "Aurora",
+    numLives: numLivesForCat
+}
+
+// 下面的代码将报错
+
+kitty = {
+    name: "Danielle",
+    numLives: numLivesForCat
+};
+
+// 但这些代码都没有问题
+kitty.name = "Rory";
+kitty.name = "Kitty";
+kitty.name = "Cat";
+kitty.numLives--;
+```
+
+上面的示例表明，除非采取了特别措施加以避免，某个`const`变量的内部状态仍然是可改变的。不过恰好TypeScript提供了将对象成员指定为`readonly`的方法。[接口]()那一章对此进行了讨论。
+
+
+## `let`与`const`的比较
+
+现在有了两种在作用域语义上类似的变量声明方式，那自然就要发出到底要使用哪种方式的疑问。与那些最为宽泛的问题一样，答案就是看具体情况。
+
+适用[最小权限原则](https://en.wikipedia.org/wiki/Principle_of_least_privilege)，除开那些将进行修改的变量，所有变量都应使用`const`加以声明。这么做的理论基础就是，在某个变量无需写入时，在同一代码基础上工作的其他人就不应自动地被赋予对该对象写的权力，同时将需要考虑他们是否真的需要对该变量进行重新赋值。使用`const`还可以在对数据流进行推演时，令到代码更可预测。
+
+总之需要三思而后行，同时在可行的情况下，应就此与团队的其它人共商此事。
+
+本手册主要使用`let`声明。
+
+
+## 解构（Destructuring）及新语法`...`
+
+TypeScript从ECMAScript 2015（ES6）那里借鉴的另一特性，就是**解构**。可从[Mozilla开发者网络](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment)对结构这一全新特性做完整了解。此小节将做简短的概览。
+
+### 数组的解构
+
+解构的最简单形式，就是数组结构式赋值（array destructuring assignment）了：
+
+```typescript
+let input: number[] = [1, 2];
+let [first, second] = input;
+
+console.log(first); // 输出 1
+console.log(second); // 输出 2
+```
+
+上面的代码，创建了两个分别名为`first`及`second`的变量。这与使用索引效果一样，却更为方便：
+
+```typescript
+let [first, second];
+first = input[0];
+second = input[1];
+```
+
+对于那些已经声明的变量，解构也工作：
+
+```typescript
+// 对变量的交换操作
+[first, second] = [second, first];
+```
+
+以及对某个函数参数的解构：
+
+```typescript
+function f ( [first, second]: [number, number] ) {
+    console.log(first);
+    console.log(second);
+}
+
+f([1, 2]);
+```
+
+使用**语法`...`**，可为某个清单（list, 也就是数组）中剩下的条目创建一个变量：
+
+```typescript
+let [first, ...remain] = [1, 2, 3, 4];
+
+console.log(first);
+console.log(remain);
+```
+
+因为这是JavaScript, 所以当然可以将那些不在乎的后续元素，简单地忽视掉：
+
+```typescript
+let [first] = [1, 2, 3, 4];
+console.log(first); // 输出 1
+```
+
+或仅结构其它元素：
+
+```typescript
+let [, second, , fourth] = [1, 2, 3, 4];
+```
+
+### 对象的解构（Object destructuring）
+
+还可以解构对象：
+
+```typescript
+let o = {
+    a: "foo",
+    b: 12,
+    c: "bar"
+};
+
+let {a, b} = 0;
+```
+
+这段代码将从`o.a`与`o.b`创建出两个新变量`a`与`b`。请注意在不需要`c`时可跳过它。
+
+与数组解构一样，可不加声明地进行赋值：
+
+```typescript
+({a, b} = {a: "baz", b: 101});
+```
+
+请注意这里必须将该语句用括号（`()`）括起来。因为**JavaScript会将`{`解析为代码块的开始**。
+
+使用`...`语法，可为某个对象中的剩余条目，创建一个变量：
+
+```typescript
+let {a, ...passthrough} = o;
+let total = passthrough.length + passthrough.c.length;
+```
+
+### 属性的重命名（新语法）
+
+给属性赋予不同的名称，也是可以的：
+
+```typescript
+let {a: newName1, b: newName2} = o;
+```
+
+从这里开始，此新语法就有点令人迷惑了。建议将`a: newName1`读作`a`作为`newName1`（"`a` as `newName1`"）。其方向是左到右（left-to-right）的, 就如同以前写的：
+
+```typescript
+let newName1 = o.a;
+let newName2 = o.b;
+```
+
+此外，这里的冒号（`:`）也不是指的类型。如果要指定类型，仍然需要写道整个解构的后面：
+
+```typescript
+let {a, b} : {a: string, b: number} = o;
+```
+
+### 对象解构的默认值（Default values, 新语法）
+
+默认值令到在某属性未被定义时，为其指派一个默认值成为可能：
+
+```typescript
+function keepWholeObject ( wholeObject: {a: string, b?: number} ) {
+    let {a, b = 1001} = wholeObject;
+
+    // do some stuff
+}
+```
+
+就算`b`未被定义，上面的`keepWholeObject`函数也会有着一个`wholeObject`变量，以及属性`a`与`b`。
+
+### 对象解构下的函数声明（Function declarations）
+
+在函数声明中，解构也可运作。在简单场合，这是很明了的：
+
+```typescript
+type C = { a: string, b?: number };
+
+function f( {a, b}: C ) void {
+    // do some stuffs
+}
+```
+
+给参数指定默认值，是更为通常的做法，而通过解构来获取默认值，却可能是难以掌握的。首先需要记住在默认值前加上模式（`C`？）：
+
+```typescript
+function f ({a, b} = {a: "", b: 0}): avoid {
+    // do some stuffs
+}
+
+f(); // 编译通过， 默认值为： {a: "", b: 0}
+```
+
+> 上面这段代码是类型推理（type inference）的一个示例，本手册后面后讲到。
 
 

@@ -11,8 +11,28 @@ for (var i = 0; i < 10; i++){
     })(i);
 }
 
-setTimeout(function() {}, 1000);
-
 for ( let i = 0; i < 10; i++ ) {
-    setTimeout(function () {console.log(i)}, 100*i);
+    setTimeout(function () {console.log(i)}, 10*i);
 }
+
+function f ( [first, second]: [number, number] ) {
+    console.log(first);
+    console.log(second);
+}
+
+f([1, 2]);
+
+let [first, ...remain] = [1, 2, 3, 4];
+
+console.log(first);
+console.log(remain);
+
+let o = {
+    a: "foo",
+    b: 12,
+    c: "bar"
+};
+let {a, ...passthrough} = o;
+
+console.log(passthrough, passthrough.c);
+
