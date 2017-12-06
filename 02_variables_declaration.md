@@ -561,4 +561,65 @@ f(); // 编译通过， 默认值为： {a: "", b: 0}
 
 > 上面这段代码是类型推理（type inference）的一个示例，本手册后面后讲到。
 
+此时，就要记住是要在被解构的属性上，而不是主初始化器上，给可选属性赋予一个默认值（Then, you need to remember to give a default for optional properties on the destructured property instead of the main initializer）。记住`C`的定义带有可选的`b`:
 
+```typescript
+function f ({ a, b = 0 } = { a: "" }): void {
+    //...
+}
+
+f ({a: "yes"}); // 可通过编译，默认 b = 0
+f (); // 可通过编译，默认 {a: ""}, 此时默认这里b = 0
+f({}); // 报错，在提供了一个参数时，就需要提供`a`
+```
+
+请小心谨慎地使用解构。如前面的示例所演示的那样，就算是最简单的解构表达式也不是那么容易理解。而在有着较深的嵌套解构时，即便不带有重命名、默认值及类型注释等操作，也难于掌握，那么就尤其容易搞混了。请尽量保持解构表达式在较小及简单的状态。可一致只写那些可以自己生成的赋值解构。
+
+## 扩展（Spread, 新语法）
+
+扩展操作符（The spread operator）与解构相反。经由扩展运算符，就可以将一个数组，展开到另一个中去，或者将一个对象展开到另一对象中去。比如：
+
+```typescript
+let first = [1, 2],
+    second = [3, 4];
+
+let bothPlus = [0, ...first, ...second, 5];
+```
+
+这段代码赋予`bothPlus`值`[0, 1, 2, 3, 4, 5]`。展开（spreading）创建出`first`与`second`变量的影子拷贝（a shadow copy）。而两个变量则并不会被展开操作所改变。
+
+对于对象，也可以对其展开：
+
+```typescript
+let defaults = { food: "spicy", price: "$$", ambiance: "noisy" };
+
+let search = { ...defaults, food: "rich" };
+```
+
+现在`search`就成了`{ food: "rich", price: "$$", ambiance: "noisy" }`。比起数组展开，对象展开**要复杂一些**。与数组展开一样，对象展开将从左到右进行处理（proceeds from left-to-right），但结果仍是一个对象。这就是说在展开对象中后来的属性，将覆盖先来的属性。所以加入将上面的示例修改为在末尾才进行展开：
+
+```
+let defaults = { food: "spicy", price: "$$", ambiance: "noisy" };
+
+let search = {  food: "rich", ...defaults };
+```
+
+此时`defaults`中的`food`属性就将覆盖`food: "rich"`，然而这并不是我们想要的。
+
+对象的展开还有其它一些令人惊讶的限制。首先，它仅包含某对象[自己的、可枚举属性(own, enumerable properties)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Enumerability_and_ownership_of_properties)。简单地说，这就意味着在展开某对象实例时，将丢失它的那些方法（Basically, that means you lose methods when you spread instances of an object）:
+
+```typescript
+class C {
+    p = 12;
+    m () {
+    }
+}
+
+let c = new C();
+let clone = { ...c };
+
+clone.p; // 没有问题
+clone.m(); // 报错！error TS2339: Property 'm' does not exist on type '{ p: number; }'.
+```
+
+此外，TypeScript编译器不支持一般函数的类型参数（the TypeScript compiler doesn't allow spreads of type parameters from generic functions）。此特性有望在该语言的后期发布中受到支持。
