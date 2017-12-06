@@ -38,5 +38,64 @@ let greeter = new Greeter ("world");
 
 ```typescript
 class Animal {
-    
+    move ( distanceInMeters: number = 0 ) {
+        console.log(`Animal moved ${distanceInMeters}m.`);
+    }    
 }
+
+class Dog extends Animal {
+    bark () {
+        console.log ('Woof! Woof!');
+    }
+}
+
+const dog = new Dog ();
+
+dog.bark();
+dog.move(10);
+dog.bark();
+```
+
+此实例给出了最基本的继承特性：类自基类继承属性及方法（classes inherit properties and methods from base classes）。这里的`Dog`类是一个使用`extends`关键字，派生自`Animal`这个*基类（base class）*的*派生（derived）*类。派生类（derived classes）通常被称作*子类（subclass）*，同时基类又通常被叫做*超类（superclass）*。
+
+因为`Dog`扩展了来自`Animal`的功能，所以这里就能创建一个可同时`bark()`及`move()`的`Dog`的实例。
+
+再来看一个更复杂的示例：
+
+```typescript
+class Animal {
+    name: string;
+
+    constructor (theName: string) { this.name = theName; }
+
+    move ( distanceInMeters: number = 0 ) {
+        console.log(`${this.name} moved ${distanceInMeters}m.`);
+    }
+}
+
+class Snake extends Animal {
+    constructor (name: string) { super(name); }
+
+    move ( distanceInMeters = 5 ) {
+        console.log( "Slithering..." );
+        super.move(distanceInMeters);
+    }
+}
+
+class Horse extends Animal {
+    constructor (name: string) { super(name); }
+
+    move (distanceInMeters = 45) {
+        console.log("Galloping...");
+        super.move(distanceInMeters);
+    }
+}
+
+let sam = new Snake("Sammy the Python");
+let tom: Animal = new Horse("Tommy the Palomino");
+
+sam.move();
+tom.move(34);
+```
+
+
