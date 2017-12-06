@@ -17,11 +17,11 @@ let greeter = new Greeter ("world");
 console.log(greeter.greet());
 
 class Animal {
-    name: string;
+    public name: string;
 
-    constructor (theName: string) { this.name = theName; }
+    public constructor (theName: string) { this.name = theName; }
 
-    move ( distanceInMeters: number = 0 ) {
+    public move ( distanceInMeters: number = 0 ) {
         console.log(`${this.name} moved ${distanceInMeters}m.`);
     }
 }
@@ -36,7 +36,12 @@ class Snake extends Animal {
 }
 
 class Horse extends Animal {
-    constructor (name: string) { super(name); }
+    height: number;
+
+    constructor (name: string, height: number) { 
+        super(name); 
+        this.height = height;
+    }
 
     move (distanceInMeters = 45) {
         console.log("Galloping...");
@@ -45,8 +50,44 @@ class Horse extends Animal {
 }
 
 let sam = new Snake("Sammy the Python");
-let tom: Animal = new Horse("Tommy the Palomino");
+let tom: Animal = new Horse("Tommy the Palomino", 185);
 
 sam.move();
 tom.move(34);
+
+
+class Creature {
+    private name: string;
+
+    constructor ( theName: string ) { this.name = theName; }
+}
+
+// new Creature("Cat").name;
+
+class Rhino extends Creature {
+    constructor () { super("Rhino"); }
+}
+
+class Person {
+    protected name: string;
+
+    constructor ( name: string ) { this.name = name; }
+}
+
+class Employee extends Person {
+    private department: string;
+
+    constructor ( name: string, department: string ) { 
+        super(name);
+        this.department = department;
+    }
+    
+    public getElevatorPitch () {
+        return `Hello, my name is ${this.name} and I work in ${this.department}.`;
+    }
+}
+
+let howard = new Employee ("Howard", "Sales");
+console.log(howard.getElevatorPitch());
+console.log(howard.name);
 
