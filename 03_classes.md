@@ -207,4 +207,181 @@ console.log(howard.getElevatorPitch());
 console.log(howard.name); // 报错： error TS2445: Property 'name' is protected and only accessible within class 'Person' and its subclasses.
 ```
 
+## 关于只读修改器（Readonly modifier）
+
+使用`readonly`关键字，可令到属性只读。只读的属性**必须在其声明处或构造函数里进行初始化**。
+
+```typescript
+class Octopus {
+    readonly name: string;
+    readonly numberOfLegs = 8;
+
+    constructor (theName: string) {
+        this.name = theName;
+    }
+}
+
+let dad  = new Octopus ("Man with the 8 strong legs");
+dad.name = "Man with the 3-piece suit"; // 报错，`name` 是只读的。error TS2540: Cannot assign to 'name' because it is a constant or a read-only property.
+```
+
+### 参数式属性（Parameter properties）
+
+上一个示例不得不在`Octopus`这个类中，声明一个只读成员`name`，以及一个构建器参数`theName`，且随后要立即将`name`设置为`theName`。这种做法被证明是一种十分常见的做法。通过*参数式属性（parameter properties）*可在一处就完成成员的创建与初始化。下面是使用参数式属性方法，对上一个`Octopus`类的更进一步修订：
+
+```typescript
+class Octopus {
+    readonly numberOfLegs: number = 8;
+
+    constructor (readonly: name: string) {}
+}
+```
+
+请注意这里完全丢弃了`theName`，而仅使用构建器上简化的`readonly name: string`参数，进行`name`成员的创建与初始化。从而实现了将声明与赋值强固到一个地方。
+
+参数式属性是通过在构造函数参数前，加上可访问性修改器（`public/private/protected`）或`readonly`，抑或同时加上可访问性修改器与`readonly`，得以声明的。对于一个声明并初始化私有成员的参数化属性，就使用`private`做前缀；对于`public`、`protected`及`readonly`亦然。
+
+
+## 访问器（Accessors）
+
+TypeScript支持以`getters/setters`方式，来拦截对某对象成员的访问。此特性赋予对各个对象成员的访问以一种更为精良的控制（TypeScript supports getters/setters as a way of intercepting accesses to a member of an object. This gives you a way of having finer-grained control over how a member is accessed on each object）。
+
+下面将一个简单的类，转换成使用`get`及`set`的形式。首先，从没有获取器与设置器（getter and setter）开始：
+
+```typescript
+class Employee {
+    fullName: string;
+}
+
+let employee = new Employee ();
+
+employee.fullName = "Bob Smith";
+
+if (employee.fullName) {
+    console.log(employee.fullName);
+}
+```
+
+尽管允许人为随机对`fullName`进行直接设置相当方便，但如果某人可以突发奇想地修改名字，那么这样做就可能带来麻烦（while allowing people to randomly set `fullName` directly is pretty handy, this might get us in trouble if people can change names on a whim）。
+
+下面一版中，将在允许用户修改`employee`对象之前，先检查用户是否有一个可用的密码。这是通过把对`fullName`的直接访问，替换为一个将检查密码的`set`方法来实现的。同时还加入了一个相应的`get`方法，以允许这个示例可以无缝地继续工作。
+
+```typescript
+let passcode = "secret passcode";
+
+class Employer {
+    private _fullName: string;
+
+    get fullName(): string {
+        return this._fullName;
+    }
+
+    set fullName(newName: string) {
+        if (passcode && passcode === "secret passcode") {
+            this._fullName = newName;
+        }
+        else {
+            console.log("Error: Unauthenticated update of employer!")
+        }
+    }
+}
+
+let employer = new Employer ();
+
+employer.fullName = "Bob Smith";
+
+if (employer.fullName) {
+    console.log(employer.fullName);
+}
+```
+
+为了证实这里的访问器有对密码进行检查，可修改一下那个密码，看看在其不匹配时，将得到警告没有更新`employer`权限的消息。
+
+有关访问器需要注意以下几点：
+
+首先，访问器特性要求将TypeScript编译器设置到输出为ECMAScript 5或更高版本。降级到ECMAScript 3是不支持的。其次，带有`get`却没有`set`的访问器，将自动推理到是`readonly`成员。这样做在从代码生成到`.d.ts`文件时是有帮助的，因为用到该属性的人可以明白他们不能修改该属性。
+
+
+## 关于静态属性（Static Properties）
+
+到目前为止，都讨论的是类的*实例（instance）*成员，这些成员都是在对象被实例化了后才出现在对象上的（Up to this point, we've only talked about the *instance* members of the class, those that show up on the object when it's instantiated）。其实还可以给类创建*静态（static）*成员，所谓静态成员，就是在类本身，而不是示例上可见的成员。下面的示例在`origin`上使用了`static`关键字，因为`origin`是所有`Grid`的通用值。各个实例通过在`origin`前加上该类的名字，来访问此值。与在访问实例时在前面加上`this.`类似，在访问静态成员时，前面加的是`Grid.`。
+
+```typescript
+class Grid {
+    static origin = { x: 0, y: 0 };
+
+    calculateDistanceFromOrigin ( point: { x: number, y: number } ) {
+        let xDist = (point.x - Grid.origin.x);
+        let yDist = (point.y - Grid.origin.y);
+
+        return Math.sqrt( xDist * xDist + yDist * yDist ) / this.scale;
+    }
+
+    constructor ( public scale: number ) {};
+}
+
+let grid1 = new Grid(1.0);
+let grid2 = new Grid(2.0);
+
+console.log(grid1.calculateDistanceFromOrigin({x: 10, y: 10}));
+console.log(grid2.calculateDistanceFromOrigin({x: 10, y: 10}));
+```
+
+## 关于抽象类（Abstract Classes）
+
+抽象类是一些可以派生出其它类的基类。抽象类不可以被直接实例化。与接口的不同之处在于，某个抽象类可以包含其成员实现的细节。抽象类及某个抽象类中的抽象方法的定义，是使用`abstract`关键字完成的（Unlike an interface, an abstract class may contain implementation details for its members. The `abstract` keyword is used to define abstract classes as well as abstract methods within an abstract class）。
+
+```typescript
+abstract class Animal {
+    abstract makeSound(): void;
+
+    move(): void {
+        console.log("roaming the earth...");
+    }
+}
+```
+
+抽象类中被标记为`abstract`的方法，不包含其具体实现，而必须要在派生类中加以实现。抽象方法与接口方法有着类似的语法。二者都定义了不带有方法体的某个方法的签名。但抽象方法必须带有`abstract`关键字，同时可以包含访问修改器（Abstract methods share a similar syntax to interface methods. Both define the signature of a method without including a method body. However, abstract methods must include the `abstract` keyword and may optionally include access modifiers）。
+
+```typescript
+abstract class Department {
+    constructor ( public name: string ) {}
+
+    printName (): void {
+        console.log("Department name: " + this.name);
+    }
+
+    abstract printMeeting (): void; // 在派生类中必须实现此方法
+}
+
+class AccountingDepartment extends Department {
+    constructor () {
+        super ("Accounting and Auditing"); // 派生类中的构建器必须调用 `super()` 方法
+    }
+    
+    printMeeting (): void {
+        console.log ("The Accounting Department meets each Monday @10am.");
+    }
+
+    generateReports (): void {
+        console.log ("Generating accounting reports...");
+    }
+}
+
+let department: Department; // 创建一个到抽象类型的引用是没有问题的 
+department = new Department (); // 报错： 无法创建某个抽象类的实例 error TS2511: Cannot create an instance of the abstract class 'Department'.
+department = new AccountingDepartment(); // 创建非抽象子类的实例并为其赋值，没有问题
+department.printName();
+department.printMeeting();
+department.generateReports(); // 报错：该方法并不存在与所声明的抽象类型上 error TS2339: Property 'generateReports' does not exist on type 'Department'.
+```
+
+## 一些高级技巧（Advanced Techniques）
+
+### 关于构建器函数
+
+当在TypeScript中声明类的时候，实际上就是同时创建出了多个的声明。首先是该类的*实例（instance）*的类型。
+
+
+
 
