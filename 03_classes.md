@@ -56,7 +56,7 @@ dog.move(10);
 dog.bark();
 ```
 
-此实例给出了最基本的继承特性：类自基类继承属性及方法（classes inherit properties and methods from base classes）。这里的`Dog`类是一个使用`extends`关键字，派生自`Animal`这个*基类（base class）*的*派生（derived）*类。派生类（derived classes）通常被称作*子类（subclass）*，同时基类又通常被叫做*超类（superclass）*。
+此实例给出了最基本的继承特性：类自基类继承属性及方法（classes inherit properties and methods from base classes）。这里的`Dog`类是一个使用`extends`关键字，派生自`Animal`这个 *基类（base class）* 的 *派生（derived）* 类。派生类（derived classes）通常被称作 *子类（subclass）* ，同时基类又通常被叫做 *超类（superclass）* 。
 
 因为`Dog`扩展了来自`Animal`的功能，所以这里就能创建一个可同时`bark()`及`move()`的`Dog`的实例。
 
@@ -100,7 +100,7 @@ tom.move(34);
 
 这个示例涵盖了一些前面没有提到的其它特性。再度看到使用了`extends`关键字建立了`Animal`的两个新子类：`Horse`与`Snake`。
 
-与前一示例的一点不同，就是每个含有构建器的派生类，都**必须**调用`super()`这个方法，以执行到基类的构造函数，否则编译器将报错（`error TS2377: Constructors for derived classes must contain a 'super' call.`, 及`error TS17009: 'super' must be called before accessing 'this' in the constructor of a derived class`）。此外，在构造函数体中，于访问`this`上的某个属性之前，**必须**先调用`super()`方法。TypeScript编译器将强制执行此一规则。
+与前一示例的一点不同，就是每个含有构建器的派生类，都 **必须** 调用`super()`这个方法，以执行到基类的构造函数，否则编译器将报错（`error TS2377: Constructors for derived classes must contain a 'super' call.`, 及`error TS17009: 'super' must be called before accessing 'this' in the constructor of a derived class`）。此外，在构造函数体中，于访问`this`上的某个属性之前， **必须** 先调用`super()`方法。TypeScript编译器将强制执行此一规则。
 
 该示例还展示了怎样以特定于子类的方法，覆写基类中方法。这里的`Snake`与`Horse`都创建了一个覆写`Animal`中的`move()`方法的`move()`方法，从而赋予其针对不同类的特定功能。请注意就算`tom`是作为一个`Animal`加以声明的，其值还是一个`Horse`， 对`tom.move(34)`的调用，将调用到`Horse`中所覆写的方法：
 
@@ -209,7 +209,7 @@ console.log(howard.name); // 报错： error TS2445: Property 'name' is protecte
 
 ## 关于只读修改器（Readonly modifier）
 
-使用`readonly`关键字，可令到属性只读。只读的属性**必须在其声明处或构造函数里进行初始化**。
+使用`readonly`关键字，可令到属性只读。只读的属性 **必须在其声明处或构造函数里进行初始化** 。
 
 ```typescript
 class Octopus {
@@ -227,7 +227,7 @@ dad.name = "Man with the 3-piece suit"; // 报错，`name` 是只读的。error 
 
 ### 参数式属性（Parameter properties）
 
-上一个示例不得不在`Octopus`这个类中，声明一个只读成员`name`，以及一个构建器参数`theName`，且随后要立即将`name`设置为`theName`。这种做法被证明是一种十分常见的做法。通过*参数式属性（parameter properties）*可在一处就完成成员的创建与初始化。下面是使用参数式属性方法，对上一个`Octopus`类的更进一步修订：
+上一个示例不得不在`Octopus`这个类中，声明一个只读成员`name`，以及一个构建器参数`theName`，且随后要立即将`name`设置为`theName`。这种做法被证明是一种十分常见的做法。通过 *参数式属性（parameter properties）* 可在一处就完成成员的创建与初始化。下面是使用参数式属性方法，对上一个`Octopus`类的更进一步修订：
 
 ```typescript
 class Octopus {
@@ -304,7 +304,7 @@ if (employer.fullName) {
 
 ## 关于静态属性（Static Properties）
 
-到目前为止，都讨论的是类的 * 实例（instance） * 成员，这些成员都是在对象被实例化了后才出现在对象上的（Up to this point, we've only talked about the *instance* members of the class, those that show up on the object when it's instantiated）。其实还可以给类创建 * 静态（static） * 成员，所谓静态成员，就是在类本身，而不是示例上可见的成员。下面的示例在`origin`上使用了`static`关键字，因为`origin`是所有`Grid`的通用值。各个实例通过在`origin`前加上该类的名字，来访问此值。与在访问实例时在前面加上`this.`类似，在访问静态成员时，前面加的是`Grid.`。
+到目前为止，都讨论的是类的 *实例（instance）* 成员，这些成员都是在对象被实例化了后才出现在对象上的（Up to this point, we've only talked about the *instance* members of the class, those that show up on the object when it's instantiated）。其实还可以给类创建 *静态（static）* 成员，所谓静态成员，就是在类本身，而不是示例上可见的成员。下面的示例在`origin`上使用了`static`关键字，因为`origin`是所有`Grid`的通用值。各个实例通过在`origin`前加上该类的名字，来访问此值。与在访问实例时在前面加上`this.`类似，在访问静态成员时，前面加的是`Grid.`。
 
 ```typescript
 class Grid {
@@ -380,7 +380,7 @@ department.generateReports(); // 报错：该方法并不存在与所声明的�
 
 ### 关于构建器函数
 
-当在TypeScript中声明类的时候，实际上就是同时创建出了多个的声明。首先是该类的*实例（instance）*的类型。
+当在TypeScript中声明类的时候，实际上就是同时创建出了多个的声明。首先是该类的 *实例（instance）* 的类型。
 
 ```typescript
 class Greeter {
@@ -424,7 +424,7 @@ greeter = new Greeter("World")!
 console.log(greeter.greet());
 ```
 
-这里的`let Greeter`**即将**被该构造函数赋值（Here, `let Greeter` is going to be assigned (by) the construtor function）。在调用`new`并允许此函数时，就得到一个该类的实例。构造函数还包含了该类的所有静态成员（`greet()`）。还可以把各个类想成是有着一个*实例*端与*静态*端（Another way to think of each class is that there is an *instance* side and *static* side）。
+这里的`let Greeter` **即将** 被该构造函数赋值（Here, `let Greeter` is going to be assigned (by) the construtor function）。在调用`new`并允许此函数时，就得到一个该类的实例。构造函数还包含了该类的所有静态成员（`greet()`）。还可以把各个类想成是有着一个 *实例* 端与 *静态* 端（Another way to think of each class is that there is an *instance* side and *static* side）。
 
 下面对该示例稍加修改，来展示这种区别：
 

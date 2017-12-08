@@ -42,7 +42,7 @@ var g = f();
 g();
 ```
 
-在上面的例子中，`g` 可以获取到函数`f`里定义的变量`a`。在`g`被调用时，它都可以访问到`f`里的变量`a`。*即使`g`在`f`已经执行完毕后才被调用，其任可以访问并对`a`进行修改*。
+在上面的例子中，`g` 可以获取到函数`f`里定义的变量`a`。在`g`被调用时，它都可以访问到`f`里的变量`a`。 *即使`g`在`f`已经执行完毕后才被调用，其任可以访问并对`a`进行修改* 。
 
 ```javascript
 function f () {
@@ -81,7 +81,7 @@ f(true); // 返回的是 `10`
 f(false); // 返回 `undefined`
 ```
 
-多看几遍这段代码就会发现，这里的变量`x`是定义在`if`语句里的，但却可以在该语句外面访问到它。究其原因，在于`var`声明可以在包含它的函数、模块、命名空间或全局作用域内的任何位置被访问到（后面将详细讨论这个问题），而所包含其的代码块却没什么影响。有人就直接叫这种作用域为**var作用域**，或**函数作用域**。对于函数参数，也适用函数作用域（函数参数也相当于`var`声明）。
+多看几遍这段代码就会发现，这里的变量`x`是定义在`if`语句里的，但却可以在该语句外面访问到它。究其原因，在于`var`声明可以在包含它的函数、模块、命名空间或全局作用域内的任何位置被访问到（后面将详细讨论这个问题），而所包含其的代码块却没什么影响。有人就直接叫这种作用域为 **var作用域** ，或 **函数作用域** 。对于函数参数，也适用函数作用域（函数参数也相当于`var`声明）。
 
 此规则所涵盖到的作用域，将引发一些错误。比如多次声明同一个变量不会报错，就是其中之一：
 
@@ -149,7 +149,7 @@ for (var i = 0; i < 10; i++){
 
 参考上面提到的捕获变量（Capturing Variables），传递给`setTimeout`的每一个函数表达式，实际上都引用了相同作用域中的同一个`i`。
 
-这里有必要花个一分钟来思考一下那意味着什么。`setTimeout`将在若干毫秒后运行一个函数，*但只是*在`for`循环已停止执行后。随着`for`循环的停止执行，`i`的值就成为`10`。这就是作为`setTimeout`的第一个参数的函数在调用时，每次都输出`10`的原因。
+这里有必要花个一分钟来思考一下那意味着什么。`setTimeout`将在若干毫秒后运行一个函数， *但只是* 在`for`循环已停止执行后。随着`for`循环的停止执行，`i`的值就成为`10`。这就是作为`setTimeout`的第一个参数的函数在调用时，每次都输出`10`的原因。
 
 作为解决此问题的一种方法，就是使用立即执行的函数表达式（Immediately Invoked Function Expression, IIFE, [参考链接](https://segmentfault.com/a/1190000003985390)）。
 
@@ -179,7 +179,7 @@ let hello = 'Hello!';
 
 ### 块作用域（Block Scoping）
 
-在使用`let`来声明某个变量时，使用了*词法作用域（Lexical Scope）*，或*块作用域（Block Scope）*。与使用`var`声明的变量可在所包含的函数外部访问到不同，块作用域的变量在包含它们的块或`for`循环之外，是不能访问的。
+在使用`let`来声明某个变量时，使用了 *词法作用域（Lexical Scope）* ，或 *块作用域（Block Scope）* 。与使用`var`声明的变量可在所包含的函数外部访问到不同，块作用域的变量在包含它们的块或`for`循环之外，是不能访问的。
 
 ```typescript
 function f (input: boolean) {
@@ -213,14 +213,14 @@ catch (e) {
 console.log(e);
 ```
 
-块级作用域变量的另一个特点，就是在其被声明之前，是不能访问的（尚未分配内存？）。虽然它们始终“存在”与它们所属的作用域里，但在声明它们的代码之前的部分，被成为*暂时性死区（Temporal Dead Zone, TDZ）*（[参考链接](https://github.com/luqin/exploring-es6-cn/blob/master/md/9.4.md)）。暂时性死区只是用来说明不能在变量的`let`语句之前，访问该变量，而TypeScript编译器可以给出这些信息。
+块级作用域变量的另一个特点，就是在其被声明之前，是不能访问的（尚未分配内存？）。虽然它们始终“存在”与它们所属的作用域里，但在声明它们的代码之前的部分，被成为 *暂时性死区（Temporal Dead Zone, TDZ）* （[参考链接](https://github.com/luqin/exploring-es6-cn/blob/master/md/9.4.md)）。暂时性死区只是用来说明不能在变量的`let`语句之前，访问该变量，而TypeScript编译器可以给出这些信息。
 
 ```typescript
 a++; // error TS2448: Block-scoped variable 'a' used before its declaration. error TS2532: Object is possibly 'undefined'.
 let a;
 ```
 
-这里需要注意一点，在一个拥有块作用域的变量被声明之前，仍然可以*获取（capture）*到它。但要在变量被声明前就去调用那个其所属的函数，是不可行的。如编译目标代码是ECMAScript 2015（ES6），那么较新的运行时将抛出一个错误；不过目前的TypeScript编译器尚不能就此进行报错。
+这里需要注意一点，在一个拥有块作用域的变量被声明之前，仍然可以 *获取（capture）* 到它。但要在变量被声明前就去调用那个其所属的函数，是不可行的。如编译目标代码是ECMAScript 2015（ES6），那么较新的运行时将抛出一个错误；不过目前的TypeScript编译器尚不能就此进行报错。
 
 ```typescript
 function foo () {
@@ -238,7 +238,7 @@ foo();
 let a;
 ```
 
-关于*暂时性死区*的更多信息，请参考[Mozilla开发者网络](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/let#Temporal_dead_zone_and_errors_with_let)。
+关于 *暂时性死区* 的更多信息，请参考[Mozilla开发者网络](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/let#Temporal_dead_zone_and_errors_with_let)。
 
 
 ## 重定义与屏蔽（Re-decalration and Shadowing）
@@ -292,7 +292,7 @@ f(false, 0); // 返回 `0`
 f(true, 0); // 返回 `100`
 ```
 
-这种在某个更深的嵌套块中引入新变量名的做法，就叫*屏蔽（shadowing）*。这样做看起来像是双刃剑，因为无意的屏蔽可能引入某些程序漏洞，同时也可能防止某些漏洞。比如，设想用现在的`let`变量来重写之前的`sumMatrix`。
+这种在某个更深的嵌套块中引入新变量名的做法，就叫 *屏蔽（shadowing）* 。这样做看起来像是双刃剑，因为无意的屏蔽可能引入某些程序漏洞，同时也可能防止某些漏洞。比如，设想用现在的`let`变量来重写之前的`sumMatrix`。
 
 ```typescript
 function sumMatrix(matrix: number[][]) {
@@ -314,7 +314,7 @@ function sumMatrix(matrix: number[][]) {
 
 ### 捕获块作用域变量（Block-scoped Variable Capturing）
 
-前面在`var`式声明上，初次接触到**变量捕获（variable capturing）**这一概念，主要对所捕获到的变量的行为，有所了解。为了对此有更直观的认识，那么就说在某个作用域运行时，该作用域就创建出一个变量的“环境”。此环境及其所捕获到的变量，就算其作用域中的所有语句执行完毕，也仍将持续存在。
+前面在`var`式声明上，初次接触到 **变量捕获（variable capturing）** 这一概念，主要对所捕获到的变量的行为，有所了解。为了对此有更直观的认识，那么就说在某个作用域运行时，该作用域就创建出一个变量的“环境”。此环境及其所捕获到的变量，就算其作用域中的所有语句执行完毕，也仍将持续存在。
 
 ```typescript
 function theCityThatAlwaysSleeps () {
@@ -369,7 +369,7 @@ const numLivesForCat = 9;
 
 此类声明与`let`声明相似，但如同它们的名称一样，经由`const`修饰的变量的值，一旦被绑定，就不能加以改变了。也就是说，这些变量与`let`式声明有着相同的作用域，但不能对其进行再度赋值。
 
-注意不要与所谓某些所引用的值*不可修改（immutable）*之概念搞混（经`const`修饰变量与那些不可修改值并不是一个东西）。
+注意不要与所谓某些所引用的值 *不可修改（immutable）* 之概念搞混（经`const`修饰变量与那些不可修改值并不是一个东西）。
 
 ```typescript
 const numLivesForCat = 9;
@@ -409,7 +409,7 @@ kitty.numLives--;
 
 ## 解构（Destructuring）及新语法`...`
 
-TypeScript从ECMAScript 2015（ES6）那里借鉴的另一特性，就是**解构**。可从[Mozilla开发者网络](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment)对结构这一全新特性做完整了解。此小节将做简短的概览。
+TypeScript从ECMAScript 2015（ES6）那里借鉴的另一特性，就是 **解构** 。可从[Mozilla开发者网络](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment)对结构这一全新特性做完整了解。此小节将做简短的概览。
 
 ### 数组的解构
 
@@ -449,7 +449,7 @@ function f ( [first, second]: [number, number] ) {
 f([1, 2]);
 ```
 
-使用**语法`...`**，可为某个清单（list, 也就是数组）中剩下的条目创建一个变量：
+使用 **语法`...`** ，可为某个清单（list, 也就是数组）中剩下的条目创建一个变量：
 
 ```typescript
 let [first, ...remain] = [1, 2, 3, 4];
@@ -493,7 +493,7 @@ let {a, b} = 0;
 ({a, b} = {a: "baz", b: 101});
 ```
 
-请注意这里必须将该语句用括号（`()`）括起来。因为**JavaScript会将`{`解析为代码块的开始**。
+请注意这里必须将该语句用括号（`()`）括起来。因为 **JavaScript会将`{`解析为代码块的开始** 。
 
 使用`...`语法，可为某个对象中的剩余条目，创建一个变量：
 
@@ -596,7 +596,7 @@ let defaults = { food: "spicy", price: "$$", ambiance: "noisy" };
 let search = { ...defaults, food: "rich" };
 ```
 
-现在`search`就成了`{ food: "rich", price: "$$", ambiance: "noisy" }`。比起数组展开，对象展开**要复杂一些**。与数组展开一样，对象展开将从左到右进行处理（proceeds from left-to-right），但结果仍是一个对象。这就是说在展开对象中后来的属性，将覆盖先来的属性。所以加入将上面的示例修改为在末尾才进行展开：
+现在`search`就成了`{ food: "rich", price: "$$", ambiance: "noisy" }`。比起数组展开，对象展开 **要复杂一些** 。与数组展开一样，对象展开将从左到右进行处理（proceeds from left-to-right），但结果仍是一个对象。这就是说在展开对象中后来的属性，将覆盖先来的属性。所以加入将上面的示例修改为在末尾才进行展开：
 
 ```
 let defaults = { food: "spicy", price: "$$", ambiance: "noisy" };

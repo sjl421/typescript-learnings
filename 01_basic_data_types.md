@@ -11,7 +11,7 @@ let isDone: boolean = false;
 
 ## 数字
 
-与JavaScript一样，TypeScript中的**所有数字，都是浮点数**，类型为`number`。TypeScript支持十进制、十六进制字面量（literal），还有ECMAScript 2015中引入的二进制与八进制字面量。
+与JavaScript一样，TypeScript中的 **所有数字，都是浮点数** ，类型为`number`。TypeScript支持十进制、十六进制字面量（literal），还有ECMAScript 2015中引入的二进制与八进制字面量。
 
 ```typescript
 let decLiteral: number = 6;
@@ -29,7 +29,7 @@ let name: string = 'Bob';
 name = "Smith";
 ```
 
-此外，TypeScript或ES6中，还可以使用*模板字符串（template string）*，它可以**定义多行文本**与**内嵌表达式**。
+此外，TypeScript或ES6中，还可以使用 *模板字符串（template string）* ，它可以 **定义多行文本** 与 **内嵌表达式** 。
 
 ```typescript
 let name: string = `Gene`;
@@ -54,7 +54,7 @@ let sentence: string = "Hello, my name is " + name + ".\n\n" +
 let list: number[] = [1, 2, 3, 4];
 ```
 
-第二种方式，是使用**数组泛型（Array Generic）**，`Array<type>`：
+第二种方式，是使用 **数组泛型（Array Generic）** ，`Array<type>`：
 
 ```typescript
 let list: Array<number> = [1, 2, 3, 4];
@@ -65,7 +65,7 @@ let list: Array<number> = [1, 2, 3, 4];
 
 ## 元组（Tuple）
 
-TypeScript中的元组，允许表示一个**已知元素数量与类型**的数组，这些元素的类型不要求一致。比如，可定义一对值分别为`string`与`number`类型的元组。
+TypeScript中的元组，允许表示一个 **已知元素数量与类型** 的数组，这些元素的类型不要求一致。比如，可定义一对值分别为`string`与`number`类型的元组。
 
 ```typescript
 // 声明一个元组类型
@@ -85,7 +85,7 @@ console.log(x[0].substr(1)); // 没有问题
 console.log(x[1].substr(1)); // 报错，'number' does not have 'substr'
 ```
 
-在访问元组的越界元素时，将使用**联合类型**（Union Types，属于高级类型(Advanced Types)的一种）进行替代：
+在访问元组的越界元素时，将使用 **联合类型** （Union Types，属于高级类型(Advanced Types)的一种）进行替代：
 
 ```typescript
 x[3] = 'fat'; // 没有问题，字符串可以赋值给（`string` | `number`）类型
@@ -188,14 +188,14 @@ let n: null = null;
 
 默认所有其它类型，都用着子类型`undefined`与`null`。也就是说，可将`null`与`undefined`赋值给`number`、`string`、`list`、`tuple`、`void`等类型。
 
-但在指定了编译器（tsc, typescript compiler）选项`--strictNullChecks`时，`null`与`undefined`就只能赋值给`void`以及它们自己了。这能避免**很多**常见的问题。比如在某处计划传入一个`string`或`null`或`undefined`的参数，那么就可使用`string | null | undefined`的**联合类型**。
+但在指定了编译器（tsc, typescript compiler）选项`--strictNullChecks`时，`null`与`undefined`就只能赋值给`void`以及它们自己了。这能避免 **很多** 常见的问题。比如在某处计划传入一个`string`或`null`或`undefined`的参数，那么就可使用`string | null | undefined`的 **联合类型** 。
 
 > 注意：TypeScript最佳实践是开启`--strictNullChecks`选项，但现阶段假设此选项是关闭的。
 
 
 ## `never`类型
 
-类型`never`表示一些永不存在的值的类型。比如，可将那些总是会抛出异常，或根本不会有返回值的函数表达式、箭头函数表达式的返回值设置为`never`类型；一些变量也可以是`never`类型，仅当它们受永不为真的**类型保护**约束时。
+类型`never`表示一些永不存在的值的类型。比如，可将那些总是会抛出异常，或根本不会有返回值的函数表达式、箭头函数表达式的返回值设置为`never`类型；一些变量也可以是`never`类型，仅当它们受永不为真的 **类型保护** 约束时。
 
 以下是一些返回`never`类型的函数：
 
@@ -223,7 +223,7 @@ function infiniteLoop (): never {
 
 可能会遇到这样的情况，相比TypeScript（编译器），Coder更有把握了解某个值的类型。也就是说Coder清楚地了解某个实体（entity, 与变量名称所对应的内存单元）有着比它现有类型（`any`/`undefined`/`null`等）更具体的类型。
 
-那么此时就可以通过**类型断言**，告诉编译器“相信我，我知道自己在干什么”，从而对编译进行干预。类型断言相当于其它语言中的类型转换，只是不进行特殊的数据检查与结构（destructure）。其对运行时没有影响，尽在编译阶段起作用。TypeScript会假设Coder已进行了必要的检查。
+那么此时就可以通过 **类型断言** ，告诉编译器“相信我，我知道自己在干什么”，从而对编译进行干预。类型断言相当于其它语言中的类型转换，只是不进行特殊的数据检查与结构（destructure）。其对运行时没有影响，尽在编译阶段起作用。TypeScript会假设Coder已进行了必要的检查。
 
 ```typescript
 let someValue: any = "This is a string";
