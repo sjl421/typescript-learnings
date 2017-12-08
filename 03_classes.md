@@ -457,7 +457,7 @@ console.log(greeter2.greet());
 
 本示例中，`greeter1`的运作与上面类似。对`Greeter`类进行了初始化，得到并使用了对象`greeter1`。这样所在前面有见过。
 
-接下来就直接使用了类`Greeter`。于此创建了一个名为`greeterMaker`的新变量。此变量（注：实际上对应的内存单元）将保有类`Greeter`自生，换种说法就是类`Greeter`的构造函数（类实际上是构造函数？）。这里使用了`typeof Greeter`，从而达到“给我类`Greeter`本身的类型”，而非类示例类型的目的。或者更准确地说，“给我那个名叫`Greeter`符号的类型”，那就是`Greeter`类的构造函数的类型了。此类型将包含`Greeter`的所有静态成员，以及建立`Greeter`类实例的构造函数。后面通过在`greeterMaker`上使用`new`关键字，创建`Greeter`的新实例，并如之前那样运行它们，就就证实了这一点。
+接下来就直接使用了类`Greeter`。于此创建了一个名为`greeterMaker`的新变量。此变量（注：实际上对应的内存单元）将保有类`Greeter`自身，换种说法就是类`Greeter`的构造函数（类实际上是构造函数？）。这里使用了`typeof Greeter`，从而达到“给我类`Greeter`本身的类型”，而非类示例类型的目的。或者更准确地说，“给我那个名叫`Greeter`符号的类型”，那就是`Greeter`类的构造函数的类型了。此类型将包含`Greeter`的所有静态成员，以及建立`Greeter`类实例的构造函数。后面通过在`greeterMaker`上使用`new`关键字，创建`Greeter`的新实例，并如之前那样运行它们，就就证实了这一点。
 
 
 ### 将类用作接口（Using a class as an interface）
