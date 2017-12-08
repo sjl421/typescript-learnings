@@ -1,8 +1,10 @@
 # TypeScript基础数据类型
 
+为令到程序有用，那么就需要能够处理一些最简单的数据单元：数字、字符串、数据结构、布尔值等等。TypeScript支持那些在JavaScript所期望的同样类型，并额外带有一种可将数值与字符串联系起来的枚举类型（For programs to be useful, we need to be able to work with some of the simplest units of data: numbers, strings, structures, boolean values, and the like. In TypeScript, we support much the same types as you would expect in JavaScript, with a convenient enumeration type thrown in to help things along）。
+
 ## 布尔值
 
-`true/false`, JavaScript与TypeScript中叫做`boolean`（其它语言也一样）。
+最基本的数据类型就是简单的`true/false`, 在JavaScript与TypeScript中都叫做`boolean`（其它语言也一样）。
 
 ```typescript
 let isDone: boolean = false;
@@ -22,14 +24,14 @@ let octalLiteral: number = 0o744;
 
 ## 字符串
 
-基于NodeJS的JavaScript服务端框架，或者众多的客户端框架，它们能够可处理客户端或服务器端的文本数据。与其它语言一样，TypeScript使用`string`来表示文本数据类型。与JavaScript一样，可使用`"`（双引号）或`'`（单引号）来表示字符串。
+基于NodeJS的JavaScript服务端框架，或者众多的客户端框架，它们能够可处理客户端或服务器端的文本数据。与其它语言一样，TypeScript使用`string`来表示文本数据类型。与JavaScript一样，可使用`"`（双引号）或`'`（单引号）来将字符串包围起来。
 
 ```typescript
 let name: string = 'Bob';
 name = "Smith";
 ```
 
-此外，TypeScript或ES6中，还可以使用 *模板字符串（template string）* ，它可以 **定义多行文本** 与 **内嵌表达式** 。
+此外，TypeScript或ES6中，还可以使用 *模板字符串（template string）* ，它可以 **定义多行文本** 与 **内嵌表达式** 这些字符串是用反引号字符（`\``）括起来，同时内嵌表达式的形式为`${ expr }`。
 
 ```typescript
 let name: string = `Gene`;
@@ -54,7 +56,7 @@ let sentence: string = "Hello, my name is " + name + ".\n\n" +
 let list: number[] = [1, 2, 3, 4];
 ```
 
-第二种方式，是使用 **数组泛型（Array Generic）** ，`Array<type>`：
+第二种方式，是使用 **数组泛型（Array Generic）** （通用数组类型, a generic array type） ，`Array<type>`：
 
 ```typescript
 let list: Array<number> = [1, 2, 3, 4];
