@@ -239,7 +239,7 @@ let someValue: any = "This is a string";
 let strLength: number = (someValue as string).length;
 ```
 
-这两种形式是等价的。使用何种写法，仅凭个人喜好；但在结合JSX（[https://jsx.github.io/](https://jsx.github.io/)）使用TypeScript时，就只能用`as`的写法。
+这两种形式是等价的。使用何种写法，仅凭个人喜好；但在结合JSX（ [jsx.github.io](https://jsx.github.io/) ）使用TypeScript时，就只能用`as`的写法。
 
 ## 深入理解`let`
 
