@@ -1,5 +1,6 @@
 'use strict';
 
+// 构建器函数，高级特性 --> 实际上声明了类型
 class Greeter {
     greeting: string;
 
@@ -12,8 +13,9 @@ class Greeter {
     }
 }
 
-let greeter = new Greeter ("world");
+let greeter: Greeter;
 
+greeter= new Greeter ("world");
 console.log(greeter.greet());
 
 class Animal {
@@ -194,4 +196,29 @@ department = new AccountingDepartment(); // 创建非抽象子类的实例并为
 department.printName();
 department.printMeeting();
 department.generateReports(); // 报错：该方法并不存在与所声明的抽象类型上
+
+class Hello {
+    static standardGreeting = "Hello, there";
+
+    greeting: string;
+
+    greet () {
+        if (this.greeting) {
+            return `Hello, ${this.greeting}`;
+        }
+        else {
+            return Hello.standardGreeting;
+        }
+    }
+}
+
+let hello1 : Hello;
+hello1 = new Hello();
+console.log (hello1.greet());
+
+let helloMaker: typeof Hello = Hello;
+helloMaker.standardGreeting = "Hey there!";
+
+let hello2: Hello = new helloMaker();
+console.log(hello2.greet());
 

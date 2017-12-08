@@ -382,6 +382,97 @@ department.generateReports(); // 报错：该方法并不存在与所声明的�
 
 当在TypeScript中声明类的时候，实际上就是同时创建出了多个的声明。首先是该类的*实例（instance）*的类型。
 
+```typescript
+class Greeter {
+    greeting: string;
+
+    construtor (msg: string) {
+        this.greeting = msg;
+    }
+
+    greet () {
+        return `Hello, ${this.greeting}`;
+    }
+}
+
+let greeter: Greeter;
+
+greeter = new Greeter("World");
+console.log(greeter.greet());
+```
+
+这里在说到`let greeter: Greeter`时，就使用了`Greeter`作为类`Greeter`的实例的类型。这对于那些其它面向对象语言的程序员来说，几乎是第二天性了（This is almost second nature to programmers from other object-oriented languages）。
+
+同时还创建出名为`构造函数（construtor function）`的另一个值。这就是在使用`new`关键字，建立该类的实例时，所调用的那个函数。为搞清楚该函数实际面貌，请看看下面由以上示例所生成的JavaScript（ES6）：
+
+```typescript
+let Greeter = (function (){
+    function Greeter (msg) {
+        this.greeting = msg;
+    }
+
+    Greeter.prototype.greet = function () {
+        return `Hello, ${this.greeting}`;
+    }
+
+    return Greeter;
+})();
+
+let greeter;
+
+greeter = new Greeter("World")!
+console.log(greeter.greet());
+```
+
+这里的`let Greeter`**即将**被该构造函数赋值（Here, `let Greeter` is going to be assigned (by) the construtor function）。在调用`new`并允许此函数时，就得到一个该类的实例。构造函数还包含了该类的所有静态成员（`greet()`）。还可以把各个类想成是有着一个*实例*端与*静态*端（Another way to think of each class is that there is an *instance* side and *static* side）。
+
+下面对该示例稍加修改，来展示这种区别：
+
+```typescript
+class Greeter {
+    static standardGreeting = "Hello, there";
+
+    greeting: string;
+
+    greet () {
+        if (this.greeting) {
+            return `Hello, ${this.greeting}`;
+        }
+        else {
+            return Greeter.standardGreeting;
+        }
+    }
+}
+
+let greeter1 : Greeter;
+greeter1 = new Greeter();
+console.log (greeter1.greet());
+
+let greeterMaker: typeof Greeter = Greeter;
+greeterMaker.standardGreeting = "Hey there!";
+
+let greeter2: Greeter = new greeterMaker();
+console.log(greeter2.greet());
+```
+
+本示例中，`greeter1`的运作与上面类似。对`Greeter`类进行了初始化，得到并使用了对象`greeter1`。这样所在前面有见过。
+
+接下来就直接使用了类`Greeter`。于此创建了一个名为`greeterMaker`的新变量。此变量（注：实际上对应的内存单元）将保有类`Greeter`自生，换种说法就是类`Greeter`的构造函数（类实际上是构造函数？）。这里使用了`typeof Greeter`，从而达到“给我类`Greeter`本身的类型”，而非类示例类型的目的。或者更准确地说，“给我那个名叫`Greeter`符号的类型”，那就是`Greeter`类的构造函数的类型了。此类型将包含`Greeter`的所有静态成员，以及建立`Greeter`类实例的构造函数。后面通过在`greeterMaker`上使用`new`关键字，创建`Greeter`的新实例，并如之前那样运行它们，就就证实了这一点。
 
 
+### 将类用作接口（Using a class as an interface）
 
+正如上一小节所说，一个类的声明，创建出两个东西：该类实例的类型，以及构造函数（a class declaration creates two things: a type representing instances of the class and a constructor function）。因为类创建了类型，所以就可以在那些可使用接口地方使用类。
+
+```typescript
+class Point {
+    x: number;
+    y: number;
+}
+
+interface Point3d extends Point {
+    z: number;
+}
+
+let point3d: Point3d = { x: 1, y: 2, z: 3 };
+```
