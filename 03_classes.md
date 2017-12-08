@@ -304,7 +304,7 @@ if (employer.fullName) {
 
 ## 关于静态属性（Static Properties）
 
-到目前为止，都讨论的是类的*实例（instance）*成员，这些成员都是在对象被实例化了后才出现在对象上的（Up to this point, we've only talked about the *instance* members of the class, those that show up on the object when it's instantiated）。其实还可以给类创建*静态（static）*成员，所谓静态成员，就是在类本身，而不是示例上可见的成员。下面的示例在`origin`上使用了`static`关键字，因为`origin`是所有`Grid`的通用值。各个实例通过在`origin`前加上该类的名字，来访问此值。与在访问实例时在前面加上`this.`类似，在访问静态成员时，前面加的是`Grid.`。
+到目前为止，都讨论的是类的* 实例（instance） *成员，这些成员都是在对象被实例化了后才出现在对象上的（Up to this point, we've only talked about the *instance* members of the class, those that show up on the object when it's instantiated）。其实还可以给类创建* 静态（static） *成员，所谓静态成员，就是在类本身，而不是示例上可见的成员。下面的示例在`origin`上使用了`static`关键字，因为`origin`是所有`Grid`的通用值。各个实例通过在`origin`前加上该类的名字，来访问此值。与在访问实例时在前面加上`this.`类似，在访问静态成员时，前面加的是`Grid.`。
 
 ```typescript
 class Grid {
