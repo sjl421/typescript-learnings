@@ -43,5 +43,29 @@ printLable (myObj);
 
 ## 可选属性（Optional Properties）
 
+接口可以包含并不需要的属性。在特定条件下某些属性存在，或根本不存在（Not all properties of an interface may be required. Some exist under certain conditions or may not be there at all）。在建立像是那种将某个仅有少数属性的对象，传递给某个函数的“选项包（option bags）”的模式时，这些可选属性用得比较普遍。
 
+下面是此种模式的一个示例：
 
+```typescript
+interface SquareConfig {
+    color?: string;
+    width?: number?
+}
+
+function createSquare ( config: SquareConfig ): {color: string; area: number} {
+    let newSquare = {color: "white", area: 100};
+
+    if (config.color) {
+        newSquare.area = config.with * config.width;
+    }
+
+    return newSquare;
+}
+
+let mySquare = createSquare({color: "black"});
+```
+
+带有可选属性的接口，其写法与其它接口相似，只需在各个可选属性的声明中，在属性名字的末尾，以`?`加以表示即可。
+
+使用可选属性的优势在于，在对可能存在的属性进行描述的同时，仍然可以阻止那些不是该接口组成部分的属性的使用。比如
