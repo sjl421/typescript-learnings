@@ -222,4 +222,109 @@ mySearch = function (src: string, sub: string): boolean {
 }
 ```
 
-函数参数会逐一检查，以每个相应参数位置的类型，与对应的类型进行检查的方式进行（Function parameters are checked one at a time, with the type in each corresponding parameter position checked against each other）。如完全不打算指定类型，那么TypeScript的上下文类型系统就可以推断出参数类型，因为该函数值是直接赋予给`SearchFunc`类型的变量的。
+函数参数会逐一检查，以每个相应参数位置的类型，与对应的类型进行检查的方式进行（Function parameters are checked one at a time, with the type in each corresponding parameter position checked against each other）。如完全不打算指定类型，那么TypeScript的上下文类型系统就可以推断出参数类型，因为该函数值是直接赋予给`SearchFunc`类型的变量的。同时，这里函数表达式的返回值类型，是由其返回值（也就是`false`或`true`）隐式给出的。加入让该函数返回数字或字符串，那么类型检查器（the type-checker）就会发出返回值类型与`SearchFunc`接口中描述的返回值类型不符的警告。
+
+```typescript
+let mySearch: SearchFunc;
+mySearch = function (src, sub) {
+    let result = src.search(sub);
+    return result > -1;
+}
+```
+
+## 可索引的类型（Indexable Types）
+
+与使用接口来描述函数类型类似，还可以使用接口类描述那些可以索引的类型（types that we can "index into"），比如`a[10]`，抑或`ageMap["daniel"]`这样的。可索引类型有着一个描述用于在该对象内部进行索引的类型的 *索引签名（index signature）*，以及在索引时返回值的类型。来看看这个示例：
+
+```typescript
+interface StringArray {
+    [index: number]: string;
+}
+
+let myArray: StringArray;
+myArray = ["Bob", "Fred"];
+
+let myStr: string = myArray[0];
+```
+
+在上面的代码中，有着一个带有索引签名的`StringArray`接口。此索引签名指出在某个`StringArray`以某个`number`加以索引时，它将返回一个`string`。
+
+TypeScript支持的索引签名有两种类型：字符串及数字。同时支持这两种类型的索引器是可能的，但从某个数字的索引器所返回的类型，则必须是从字符串索引器所返回类型的子类型（It is possible to support both types of indexers, but the type returned from a numeric indexer must be a subtype of the type returned from the string indexer）。这是因为在以某个`number`进行索引时，JavaScript实际上会在对某个对象进行索引前，将其转换成`string`。也就是说，在使用`100`（`number`）来进行索引时，实际上与使用`"100"`（`string`）效果是一样的，因此二者就需要一致（That means that indexing with `100` (a `number`) is the same thing as indexing with `"100"` (a `stirng`), so the two need to be consistent）。
+
+```typescript
+class Animal {
+    name: string;
+}
+
+class Dog extends Animal {
+    breed: string;
+}
+
+// Numeric index type 'Animal' is not assignable to string index type 'Dog'. (2413)
+interface NotOkay {
+    [x: number]: Animal;
+    [x: string]: Dog;
+}
+```
+
+尽管字符串的索引签名是描述“字典”模式的一种强大方式，但它们同时强制了与它们的返回值类型匹配的属性值（While string index signatures are a powerful way to describe the "dictionary" pattern, they also enforce that all properties match their return type）。这是因为字符串的索引申明了`obj.property`同时与`obj["property"]`可用。在下面的示例中，`name`的类型与该字符串索引器的类型并不匹配，那么类型检查器就会给出一个错误：
+
+```typescript
+//Property 'name' of type 'string' is not assignable to string index type 'number'. (2411)
+interface NumberDictionary {
+    [index: string]: number;
+    length: number;
+    name: string;
+}
+```
+
+最后，为了阻止对指数的赋值，就可以将这些索引签名置为只读（Finally, you can make index signatures readonly in order to prevent assignment to their indices）:
+
+```typescript
+interface ReadonlyStringArray {
+    readonly [index: number]: string;
+}
+
+let myArray: ReadonlyStringArray = ["Alice", "Bob"];
+//Index signature in type 'ReadonlyStringArray' only permits reading. (2542)
+myArray[2] = "Mallory";
+```
+
+因为此处的索引签名是只读的，因此这里就不能设置`myArray[2]`了。
+
+
+## 类的类型（Class Types）
+
+###应用某个接口（Implementing an interface）
+
+在诸如C#及Java这样的语言中，接口的一种最常用方式，就是显式地强调某个类满足一种特定的合约，那么在TypeScript中，这样做也是可能的。
+
+```typescript
+interface ClockInterface {
+    currentTime: Date;
+}
+
+class Clock implements ClockInterface {
+    currentTime: Date;
+    constructor (h: number, m: number) {}
+}
+```
+
+在接口中还可以对将在类中应用到的方法进行描述，就像下面示例中对`setTime`所做的那样：
+
+```typescript
+interface ClockInterface {
+    currentTime: Date;
+    setTime (d: Date);
+}
+
+class Clock implements ClockInterface {
+    currentTime: Date;
+
+    setTime (d: Date) {
+        this.currentTime = d;
+    }
+
+    constructor (h: number, m: number) {}
+}
+```

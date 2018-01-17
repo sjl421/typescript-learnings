@@ -45,11 +45,33 @@ interface Point {
 
 let p1: Point = { x: 10, y: 20 };
 
-let a: number[] = [1, 2, 3, 4];
-let ro: ReadonlyArray<number> = a;
-ro[0] = 12;
-ro.push(5);
-ro.length = 100;
-a = ro as number[];
-console.log(a);
+// 多余属性检查
+
+
+// 可索引类型
+class Animal {
+    name: string;
+}
+
+class Dog extends Animal {
+    breed: string;
+}
+
+interface NotOkay {
+    [x: number]: Animal;
+    [x: string]: Dog;
+}
+
+interface NumberDictionary {
+    [index: string]: number;
+    length: number;
+    name: string;
+}
+
+interface ReadonlyStringArray {
+    readonly [index: number]: string;
+}
+
+let myArray: ReadonlyStringArray = ["Alice", "Bob"];
+myArray[2] = "Mallory";
 
