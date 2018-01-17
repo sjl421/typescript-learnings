@@ -50,7 +50,7 @@ printLable (myObj);
 ```typescript
 interface SquareConfig {
     color?: string;
-    width?: number?
+    width?: number;
 }
 
 function createSquare ( config: SquareConfig ): {color: string; area: number} {
@@ -68,4 +68,158 @@ let mySquare = createSquare({color: "black"});
 
 带有可选属性的接口，其写法与其它接口相似，只需在各个可选属性的声明中，在属性名字的末尾，以`?`加以表示即可。
 
-使用可选属性的优势在于，在对可能存在的属性进行描述的同时，仍然可以阻止那些不是该接口组成部分的属性的使用。比如
+使用可选属性的优势在于，在对可能存在的属性进行描述的同时，仍然可以阻止那些不是该接口组成部分的属性的使用。比如在将`createSquare`中的`color`属性错误拼写的情况下，就会收到提醒的错误消息：
+
+```typescript
+interface SquareConfig {
+    color?: string;
+    width?: number;
+}
+
+function createSquare ( config: SquareConfig ): { color: string; area: number } {
+    let newSquare = { color: "white", area: 100 };
+    //Property 'clor' does not exist on type 'SquareConfig'. Did you mean 'color'? (2551) 
+    if (config.color) {
+        newSquare.color = config.clor;
+    }
+
+    if ( config.width ) {
+        newSquare.area = config.width * config.width;
+    }
+
+    return newSquare;
+}
+
+let mySquare = createSquare({color: "black"});
+```
+
+## 只读属性（Readonly properties）
+
+一些属性只应在对象刚被创建时是可修改的。那么可通过将`readonly`关键字放在该属性名称前，对这些属性加以指定。
+
+```typescript
+interface Point {
+    readonly x: number;
+    readonly y: number;
+}
+```
+
+就可以通过指派一个对象文字（an object literal），构建出一个`Point`出来。在赋值过后，`x`与`y`就再也不能修改了。
+
+```typescript
+let p1: Point = { x: 10, y: 20 };
+p1.x = 5; //Cannot assign to 'x' because it is a constant or a read-only property. (2540)
+```
+
+TypeScript 有着一个`ReadonlyArray<T>`类型，该类型与`Array<T>`一致，只是移除了所有变异方法（with all mutating methods removed），因此向下面这样就可以确保在某个数组创建出后，不会被修改：
+
+```typescript
+let a: number[] = [1, 2, 3, 4];
+let ro: ReadonlyArray<number> = a;
+ro[0] = 12; //Index signature in type 'ReadonlyArray<number>' only permits reading. (2542)
+ro.push(5); //Property 'push' does not exist on type 'ReadonlyArray<number>'. (2339) 
+ro.length = 100;//Cannot assign to 'length' because it is a constant or a read-only property. (2540)
+a = ro;//Type 'ReadonlyArray<number>' is not assignable to type 'number[]'
+```
+
+上面这段代码中最后一行可以看出，将整个`ReadonlyArray`往回赋值给正常数组，也是非法的。但仍然可以使用一个类型断言（a type assertion），以消除此错误：
+
+```typescript
+a = ro as number[];
+```
+
+### `readonly` 与 `const`的区别
+
+对于要使用`readonly`或`const`，最简单的办法就是区分是要在变量上，还是属性上使用。对于变量，当然就用`const`，属性则用`readonly`。
+
+## 关于多余属性检查（Excess Property Checks）
+
+在采用了接口的第一个示例中，TypeScript令到可将`{size: number; label: string;}`传递给某些仅期望一个`{label: string;}`的地方。后面还介绍了关于可选属性，以及可选属性在名为“选项包（option bags）”的地方如何发挥作用。
+
+但是，如像在JavaScript中那样，将这两个特性单纯地结合在一起，就足以杀死你自己，下面就用最后一个示例使用`createSquare`来说明一下：
+
+```typescript
+interface SquareConfig {
+    color?: string;
+    width?: number;
+}
+
+function createSquare ( config: SquareConfig ): { color: string; area: number } {
+    // ...
+}
+
+let mySquare = createSquare ({ colour: "red", width: 100 });
+```
+
+注意这里给予`createSquare`的参数被写成了`colour`，而不是`color`。在普通的JavaScript中，这类错误将不会报错。
+
+对于这个诚实，你可能会说没有错误拼写，因为`width`属性是兼容的，没有`color`属性出现，同时这里额外的`colour`属性是不重要的。
+
+不过，TypeScript会认为在这段代码中存在问题。对象字面值会受到特别对待，同时在将对象字面值赋予给其它变量，或者将它们作为参数加以传递时，而收到 *多余属性检查*。如某个对象字面值有着任何目标对象不具有的属性时，就会报出错误。
+
+```typescript
+// Argument of type '{ colour: string; width: number; }' is not assignable to parameter of type 'SquareConfig'.
+// Object literal may only specify known properties, but 'colour' does not exist in type 'SquareConfig'. Did you mean to write 'color'? (2345)
+let mySquare = createSquare({colour: "red", width: 100});
+```
+
+绕过此类检查实际上相当简单。最容易的做法就是使用一个类型断言（a type assertion）：
+
+```typescript
+let mySquare = createSquare({width: 100, opacity: 0.5} as SquareConfig);
+```
+
+不过，在确定对象可能有某些在特别情况下会用到额外属性时，一种更好的方式就是为其添加一个字符串的索引签名（a string index signature）。比如在这里的`SquareConfig`们就可以有着上面`color`与`width`属性，但也可以具有任意数量的其它属性，那么就可以将其定义成下面这样：
+
+```typescript
+interface SquareConfig {
+    color?: string;
+    width?: number;
+    [propName: string]: any;
+}
+```
+
+索引签名这个概念在后面会涉及，这里说的是`SquareConfig`可以有着任意数量的属性，而只要这些属性不是`color`或`width`就可以，它们的类型并不重要。
+
+绕过这些检查的一种终极方式，可能有点意外，就是将该对象赋值给另一变量：因为`squareConfig`不会受多余属性检查，因此编译器也就不会给出错误。
+
+```typescript
+let squareConfig = { colour: "red", width: 100 };
+let mySquare = createSquare(squareConfig);
+```
+
+请记住对于像是上面的简单代码，一般不必尝试“绕过”这些检查。而对于更为复杂的、有着方法并存有状态的对象字面值（complex object literals that have methods and hold state），可能就要牢记这些技巧了，但大多数的多余属性错误，都是真实存在的bugs。那就意味着在使用诸如选项包（option bags）这类的特性，而出现多余属性检查类问题时，就应该对类型定义加以审视。在此实例中，如果允许将某个有着`color`或`colour`属性的对象传递给`createSquare`方法，那么就要修改`SquareConfig`的定义，来反应出这一点。
+
+## 函数的类型（Function Types）
+
+对于描述JavaScript的对象所能接受的范围宽广的形，接口都是可行的（Interfaces are capable of describing the wide range of shapes that JavaScript objects can take）。除了用于描述带有属性的对象，接口还可以描述函数类型。
+
+要用接口来描述函数，就要给予该接口一个调用签名（a call signature）。这就像是一个仅有着参数清单与返回值类型的函数声明。参数清单中的各参数，都要求名称与类型。
+
+```typescript
+interface SearchFunc {
+    (source: string, subString: string): boolean;
+}
+```
+
+一旦定义好，就可以像使用其它接口一样，对此函数类型接口（this function type interface）进行使用了。这里展示了创建一个某种函数类型的变量，并把同一类型的函数值赋予给它的过程（create *a variable of a function type* and assign it *a function value* of the same type）。
+
+```typescript
+let mySearch: SearchFunc;
+mySearch = function (source: string; subString: string) {
+    let result = source.search(subString);
+    return result > -1;
+}
+```
+
+参数名称无需匹配，就可以对函数类型进行正确的类型检查。比如这里可以像下面这样编写上面的示例：
+
+```typescript
+let mySearch: SearchFunc;
+mySearch = function (src: string, sub: string): boolean {
+    let result = src.search(sub);
+    return result > -1;
+}
+```
+
+函数参数会逐一检查，以每个相应参数位置的类型，与对应的类型进行检查的方式进行（Function parameters are checked one at a time, with the type in each corresponding parameter position checked against each other）。如完全不打算指定类型，那么TypeScript的上下文类型系统就可以推断出参数类型，因为该函数值是直接赋予给`SearchFunc`类型的变量的。
