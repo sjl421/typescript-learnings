@@ -127,4 +127,69 @@ let result3 = buildName ("Bob", "Adams", "Sr. ");
 let result4 = buildName ("Bob", "Adams");
 ```
 
+位于所有必需参数之后的已默认初始化的参数，是作为可选参数加以处理的，同时与可选参数一样，在对其相应函数进行调用时可以省略。这就意味着可选参数与随后的默认参数，在其类型上有着共性，因此这两个函数：
+
+```typescript
+function buildName (firstName: string, lastName?: string) {
+    // ...
+}
+```
+
+与
+
+```typescript
+function buildName (firstName: string, lastName = "Smith") {
+    // ...
+}
+```
+
+共用了同样的类型 `(firstName: string, lastName?: string) => string`。在类型中，`lastName`的默认值已然消失了，而只剩下该参数是可选参数的事实。
+
+与普通可选参数不同，已默认初始化的参数，并不需要出现在必需参数后面。在某个已默认初始化参数位处某个必需参数之前时，用户就需要显式地传递`undefined`，以取得默认值。比如，这里可将上一个示例编写为仅在`firstName`上有一个默认初始参数（a default initializer）：
+
+```typescript
+function buildName (firstName = "Will", lastName: string) {
+    return firstName + "  " + lastName;
+}
+
+let result1 = buildName ("Bob"); // 将报错，参数太少
+let result2 = buildName ("Bob", "Adams", "Sr. "); // 报错，参数太多
+let result3 = buildName ("Bob", "Adams");
+let result4 = buildName (undefined, "Adams");
+```
+
+## 其余参数（Rest Parameters）
+
+必需参数、可选参数与默认参数，它们都有着一个相同点：它们同时都只能与一个参数交谈。某些情况下，需要处理作为一组的多个参数的情况，或者可能不知道函数最终会取多少个参数。在JavaScript中，可以直接使用每个函数体中都可见的`arguments`变量，来处理此类问题。
+
+在TypeScript中，可将这些参数聚集到一个变量中：
+
+```typescript
+function buildName (firstName: string, ...restOfName: string[]) {
+    return firstName + "  " + restOfName.join(" "); 
+}
+
+let employeeName = buildName ("Joseph", "Sameul", "Lucas", "MacKinzie");
+```
+
+*其余参数* 是以数量不限的可选参数加以处理的（ *Rest parameters* are treated as a boundless number of optional parameters）。在将参数传递给某个其余参数时，可传递任意所需数目的参数；一个也不传也是可以的。编译器将构建一个使用位处省略号（the ellipsis, `...`）之后的名称，而传递的那些参数的数组，从而允许在函数中使用到这些参数。
+
+在带有其余参数的函数类型中，也有使用省略号：
+
+```typescript
+function buildName (firstName: string, ...restOfName: string[]) {
+    return firstName + "  " + restOfName.join(" ");
+}
+
+let buildNameFun: (fname: string, ...rest: string[]) => string = buildName;
+```
+
+## 关于`this`
+
+在JavaScript中，学会如何使用`this`，就相当于是一个成人仪式（Learning how to use `this` in JavaScript is something of a rite of passage）。因为TypeScript是JavaScript的一个超集，那么TypeScript的开发者同样需要掌握怎样使用`this`，以及怎样发现其未被正确使用。
+
+幸运的是，TypeScript提供了几种捕获不正确使用`this`的技巧。如想要了解JavaScript中`this`的运作原理，请移步 Yehuda Katz 的 [Understanding JavaScript Function Invocation and "this"](http://yehudakatz.com/2011/08/11/understanding-javascript-function-invocation-and-this/)一文。Yehuda的文章对`this`的内部运作讲得很好，因此这里就只涉及一些基础知识。
+
+### `this`与箭头函数（arrow functions）
+
 
