@@ -59,13 +59,11 @@ class Dog extends Animal {
 
 interface NotOkay {
     [x: number]: Animal;
-    [x: string]: Dog;
 }
 
 interface NumberDictionary {
     [index: string]: number;
     length: number;
-    name: string;
 }
 
 interface ReadonlyStringArray {
@@ -73,5 +71,24 @@ interface ReadonlyStringArray {
 }
 
 let myArray: ReadonlyStringArray = ["Alice", "Bob"];
-myArray[2] = "Mallory";
+
+class Control {
+    private state: any;
+}
+
+interface SelectableControl extends Control {
+    select (): void;
+}
+
+class Button extends Control implements SelectableControl {
+    select () {}
+}
+
+class TextBox extends Control {}
+
+class Image implements SelectableControl {
+    select () {}
+}
+
+class Location {}
 

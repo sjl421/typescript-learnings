@@ -328,3 +328,161 @@ class Clock implements ClockInterface {
     constructor (h: number, m: number) {}
 }
 ```
+
+接口对类的公共侧进行了描述，而不是同时描述公共及私有侧。这就禁止对使用接口来对同时有着特定类型的该类实例的私有面的类，进行检查（Interfaces describe the public side of the class, rather than both the public and private side. This prohibits you from using them to check that a class also has particular types for the private side of the class instance）。
+
+### 类的静态与实例侧（Difference between the static and instance sides of classes）
+
+在与类一同使用接口是时，记住类有着两种类型：静态侧的类型与示例侧的类型（the type of the static side and the type of the instance side），是有帮助的。或许已经注意到在使用构建签名来建立一个接口，并尝试应用此接口来建立类的时候，将报出一个错误：
+
+```typescript
+interface ClockInterface {
+    new (hour: number, minute: number);
+}
+
+class Clock implements ClockInterface {
+    currentTime: Date;
+    constructor (h: number, m: number) {}
+}
+```
+
+这是因为在某个类应用某个接口时，仅有该类的实例侧被检查了。因为该构建器位处静态侧，所以其并不包含在此检查中。
+
+那么就需要直接在该类的静态侧上动手了。在此实例中，定义了两个接口：用于构建器的`ClockConstrutor`与用于实例方法的`ClockInterface`。随后为便利起见，这里定义了一个构建器函数`createClock`，以创建出传递给它的该类型的实例。
+
+```typescript
+interface ClockConstrutor {
+    new (hour: number, minute: number): ClockInterface;
+}
+
+interface ClockInterface {
+    tick();
+}
+
+function createClock (ctor: ClockConstrutor, hour: number, minute: number): ClockInterface {
+    return new ctor (hour, minute);
+}
+
+class DigitalClock implements ClockInterface {
+    constructor (h: number, m: number) {}
+
+    tick () {
+        console.log("beep beep");
+    }
+}
+
+class AnalogClock implements ClockInterface {
+    constructor (h: number, m: number) {}
+
+    tick () {
+        console.log("tick tock");
+    }
+}
+
+let digital = createClock (DigitalClock, 12, 17);
+let analog = createClock (AnalogClock, 7, 32);
+```
+
+因为`createClock`第一个参数是`ClockConstrutor`, 那么在`createClock(AnalogClock, 7, 32)`中，它就对`AnalogClock`有着正确的构建签名进行检查。
+
+## 扩展接口（Extending Interfaces）
+
+与类一样，接口也可以相互扩展。此特性令到将某接口的成员拷贝到另一接口可行，这就在将接口分离为可重用组件时，提供更多的灵活性。
+
+```typescript
+interface Shape {
+    color: string;
+}
+
+interface Square extends Shape {
+    sideLength: number;
+}
+
+let square = <Square> {};
+square.color = "blue";
+square.sideLength = 10;
+```
+
+一个接口还可以对多个接口进行扩展，从而创建出所有接口的一个联合（a combination of all of the interfaces）：
+
+```typescript
+interface Shape {
+    color: string;
+}
+
+interface PenStroke {
+    penWidth: number;
+}
+
+
+interface Square extends Shape, PenStroke {
+    sideLength: number;
+}
+
+let square = <Square> {};
+square.color = "blue";
+square.sideLength = 10;
+square.penWidth = 5.0;
+```
+
+## 混合类型（Hybrid Types）
+
+正如早先所提到的那样，接口具备描述存在于真实世界JavaScript中的丰富类型（As we mentioned earlier, interfaces can describe the rich types present in real world JavaScript）。由于JavaScript的动态且灵活的天性，因此偶尔会遇到某个对象将以结合上述各种类型的方式运作的情况。
+
+这类实例之一，就是某个对象同时以函数与对象，并带有一些属性方式行事：
+
+```typescript
+interface Counter {
+    (start: number): string;
+    interval: number;
+    reset(): void;
+}
+
+function getCounter (): Counter {
+    let counter = <Counter> function (start: number) {};
+    counter.interval = 123;
+    counter.reset = function () {};
+    return counter;
+}
+
+let c = getCounter();
+c(10);
+c.reset();
+c.interval = 5.0;
+```
+
+在与第三方JavaScript（注：TypeScript, 你，别人的程序）交互时，就需要使用上面这样的模式，来充分描述类型的形状（When interacting with 3rd-party JavaScript, you may need to use patterns like the above to fully describe the shape of the type）。
+
+## 对类进行扩展的接口（Interface Extending Classes）
+
+当某个接口对类类型进行扩展时，它将继承该类的成员，却不继承这些成员的实现（When an interface type extends a class type, it inherits the members of the class but not their implementations）。这就如同接口已经对该类的所有成员进行了声明，而没有提供到其具体实现。接口甚至会继承到某个基类的私有及受保护成员。那就意味着在创建某个对带有私有及保护成员的类进行扩展的接口时，所建立的接口类型，就只能被被扩展的类所其子类所应用（实现，It is as if the interface had declared all of the members of the class without providing an implementation. Interfaces inherit even the private and protected members of a base class. This means that when you create an interface that extends a class with private or protected members, that interface type can only be implemented by that class or a subclass of it）。
+
+在有着大的继承层次时，此特性是有用的，但需要指出的是，这只在代码中有着仅带有确定属性的子类时才有用（This is useful when you have a large inheritance hierarchy, but want to specify that your code works with only subclass that have certain properties）。这些子类除了继承自基类外，不必是有关联的。比如：
+
+```typescript
+class Control {
+    private state: any;
+}
+
+interface SelectableControl extends Control {
+    select (): void;
+}
+
+class Button extends Control implements SelectableControl {
+    select () {}
+}
+
+class TextBox extends Control {}
+
+//Class 'Image' incorrectly implements interface 'SelectableControl'.
+//Property 'state' is missing in type 'Image'. (2420)
+class Image implements SelectableControl {
+    select () {}
+}
+
+class Location {}
+```
+
+在上面的示例中，`SelectableControl`包含了所有`Control`的成员，包括私有的`state`属性。因为`state`是一个私有成员，因此对于`Control`的后代，就只可能去应用`SelectableControl`这个接口了。这是因为只有`Control`的后代，才会有着这个源自同一声明的`state`私有成员，这也是私有成员可用的一个要求（Since `state` is a private member it is only possible for descendants of `Control` to implement `SelectableControl`. This is because only descendants of `Control` will have a `state` private member that originates in the same declaration, which is a requirement for private members to be compatible）。
+
+在`Control`这个类中，通过`SelectableControl`的某个实例去访问`state`这个私有成员，是可能的。同时，某个`SelectableControl`也会与一个已知有着`select`方法的`Control`那样行事（Effectively, a `SelectableControl` acts like a `Control` that is known to have a `select` method）。这里的`Button`与`TextBox`都是`SelectableControl`的子类型（因为它们都是继承自`Control`，并有着`select`方法）, 但`Image`与`Location`就不是了。
