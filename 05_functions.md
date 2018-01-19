@@ -309,6 +309,21 @@ interface UIElement {
 ```typescript
 class Handler {
     info: string;
+    onClickBad (this: Handler, e: Event) {
+        // 呃，这里使用了 `this`。如果使用这个回调函数，那么在运行时就将崩溃
+        this.info = e.message;
+    }
+}
+
+let h = new Handler ();
+uiElement.addClickListener (h.onClickGood);
+```
+
+在对`this`进行了注释后，就显式的要求`onClickGood`必须在`Handler`类的某个实例上加以调用（With `this` annotated, you make it explicit that `onClickGood` must be called on an instance of `Handler`）。那么TypeScript就将侦测到`addClickListener`要求有着`this: void`的函数了。为解决这个问题，就需要修改`this`的类型：
+
+```typescript
+class Handler {
+    info: string;
     onClickGood (this: void, e: Event) {
         // 这里是无法使用`this`的，因为其为`void`类型
         console.log('clicked!');
@@ -317,6 +332,7 @@ class Handler {
 
 let h = new Handler ();
 uiElement.addClickListener (h.onClickGood);
+
 ```
 
 因为`onClickGood`将其`this`类型指定为了`void`，所以传递给`addClickListener`是合法的。当然，这也意味着`onClickGood`不能使用`this.info`了。如既要传递给`addClickListener`又要使用`this.info`，那么就不得不使用一个箭头函数了（箭头函数在创建时捕获`this`，调用时不捕获）。
