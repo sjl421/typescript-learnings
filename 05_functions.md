@@ -344,4 +344,68 @@ class Handler {
 }
 ```
 
+这会起作用，因为箭头函数不对`this`进行捕获，因此总是能够将它们传递给那些期望`this: void`的主调函数。此方法的不足之处在于，对于每个类型处理器对象，一个箭头函数就被创建出来。而对于作为另一方式的对象方法，则是只被创建一次，随后就附着在处理器的原型之上。这些对象方法，在类型处理器的所有对象之间得以共享（The downside is that one arrow function is created per object of type Handler. Methods, on the other hand, are only created once and attached to Handler's prototype. They are shared between all objects of type Handler）。
+
+## Overloads
+
+JavaScript本质上是一种甚为动态的语言。基于所传入的参数形状，某单个的JavaScript函数返回不同类型的对象，这种情况并不罕见（JavaScript is inherently a very dynamic language. It's not uncommon for a single JavaScript function to return different types of objects based on the shape of the arguments passed in）。
+
+```typescript
+let suits = ["hearts", "spades", "clubs", "diamonds"];
+
+function pickCard(x): any {
+    // 
+    //
+    if ( typeof x == "object" ) {
+        let pickedCard = Math.floor (Math.random() * x.length);
+        return pickedCard;
+    }
+
+    // 
+    else if (typeof x == "number") {
+        let pickedSuit = Math.floor(x/13);
+        return { suit: suits[pickedSuit], card: x%13 };
+    }
+}
+
+let myDeck = [{suit: "diamonds", card: 2}, {suit: "spades", card: 10}, {suit: "hearts", card: 4}];
+let pickedCard1 = myDeck[pickCard(myDeck)];
+alert("Card: " + pickedCard1.card + " of " + pickedCard1.suit);
+
+let pickedCard2 = pickCard(15);
+alert("Card: " + pickedCard2.card + " of " + pickedCard2.suit);
+```
+
+基于用户传入参数，这里的`pickCard`函数将返回两种不同的结果。如果用户传入一个表示扑克牌的对象，那么该函数将抽出一张牌。而如果用户抽取了一张牌，那么这里将告诉他抽取的是那张牌。但怎么来将此逻辑描述给类型系统呢？
+
+答案就是，以 **过载清单** 的形式，为同一函数提供多个函数类型（The answer is to supply multiple function types for the same function as **a list of overloads**）。下面就来建立一个描述`pickCard`函数接受何种参数，以及返回什么值的过载清单。
+
+```typescript
+let suits = ["hearts", "spades", "clubs", "diamonds"];
+
+function pickCard (x: {suit: string; card: number;} []): number;
+function pickCard (x: number): {suit: string; card: number;};
+
+function pickCard (x): any {
+    // 
+    //
+    if ( typeof x == "object" ) {
+        let pickedCard = Math.floor (Math.random() * x.length);
+        return pickedCard;
+    }
+
+    // 
+    else if (typeof x == "number") {
+        let pickedSuit = Math.floor(x/13);
+        return { suit: suits[pickedSuit], card: x%13 };
+    }
+}
+
+let myDeck = [{suit: "diamonds", card: 2}, {suit: "spades", card: 10}, {suit: "hearts", card: 4}];
+let pickedCard1 = myDeck[pickCard(myDeck)];
+alert("Card: " + pickedCard1.card + " of " + pickedCard1.suit);
+
+let pickedCard2 = pickCard(15);
+alert("Card: " + pickedCard2.card + " of " + pickedCard2.suit);
+```
 
