@@ -409,3 +409,8 @@ let pickedCard2 = pickCard(15);
 alert("Card: " + pickedCard2.card + " of " + pickedCard2.suit);
 ```
 
+做出此改变后，现在过载就给到了对`pickCard`函数 **有类型检查的调用**（ **type-checked calls** ）了。
+
+为了让编译器拾取到正确的类型检查，编译器采取了与JavaScript底层类似的处理。编译器查看过载清单，从首条过载开始尝试以所提供的参数，对函数进行调用。在发现参数与函数类型中的参数类型匹配时，就取用该过载作为正确的过载。因此，就应将那些过载，以最具体到最宽泛的顺序加以排列。
+
+请注意这里的`function pickCard(x): any`代码，就并非该过载清单的部分了，那么函数`pickCard`就只有两条过载：一个是取得一个对象，另一个是取得一个数字。若以任何其它参数类型调用`pickCard`，都将引发错误。
