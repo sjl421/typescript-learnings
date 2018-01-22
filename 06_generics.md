@@ -6,7 +6,7 @@
 
 在诸如C#与Java这样的程序语言中，它们工具箱中用于可重用组件创建的主要工具之一，就是 *泛型（generics）*，借助于泛型特性，就可以创建出可工作于不同类型，而非单一类型的组件。这就允许用户对组件进行消费，并使用其各自的类型。
 
-（注：[https://en.wikipedia.org/wiki/Generic_programming](泛型) ）
+（注：[泛型](https://en.wikipedia.org/wiki/Generic_programming) ）
 
 ## 泛型入门
 
