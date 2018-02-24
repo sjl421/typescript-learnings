@@ -27,3 +27,11 @@ alert("Card: " + pickedCard1.card + " of " + pickedCard1.suit);
 let pickedCard2 = pickCard(15);
 alert("Card: " + pickedCard2.card + " of " + pickedCard2.suit);
 
+
+function identity<T> (arg: T): T {
+    console.log(arg.length);
+    return arg;
+}
+
+console.log(identity<string>("myString"));
+console.log(identity(1));
