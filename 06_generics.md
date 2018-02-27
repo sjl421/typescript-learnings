@@ -81,4 +81,29 @@ function identity<T>(arg: T): T {
 
 这样做的话，编译器将给出一个在成员`arg`上使用`.length`的错误，然而没有那里说过`arg`上有着此成员。请记住，前面已经提及到，这些类型变量代替的是`any`及所有类型，因此使用此函数的某个人可能传入的是一个`number`，而一个`number`显然是没有`.length`成员的。
 
+这里实际上是要该函数在`T`的数组上操作，而不是在`T`上。而一旦对数组进行操作，那么`.length`成员就可用了。可像下面将创建其它类型的数组那样，对此进行描述：
+
+```typescript
+function loggingIdentity<T>(arg: T[]): T[] {
+    console.log(arg.length); // 因为数组有着长度，因此不再发生错误
+    return arg;
+}
+```
+
+可将`loggingIdentity`的类型，读作“泛型函数`loggingIdentity`，获取一个类型参数`T`，以及一个为`T`的数组的参数`arg`，而返回一个`T`的数组”（"the generic function `loggingIdentity` takes a type parameter `T`, and an argument `arg` which is an array of `T`s, and returns an array of `T`s"）。在将一个数字数组传递进去时，将获取到一个返回的数字数组，同时`T`将绑定到`number`类型。这就允许将这里的泛型变量`T`作为所处理的类型的一部分，而非整个类型，从而带来更大的灵活性（This allows us to use our generic type variable `T` as part of the types we're working with, rather than the whole type, giving us greater flexibility，这里涉及两个类型，泛型`T`及泛型`T`的数组，因此说`T`是处理类型的部分）。
+
+还可以将同一示例，写成下面这种形式：
+
+```typescript
+function loggingIdentity<T>(arg: Array<T>): Array<T> {
+    console.log(arg.length);
+    return arg;
+}
+```
+
+其它语言中也有此种写法。下一小节，将探讨如何创建自己的诸如`Array<T>`这样的泛型。
+
+
+## 泛型（Generic Types）
+
 
