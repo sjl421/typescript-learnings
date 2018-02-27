@@ -90,7 +90,7 @@ function loggingIdentity<T>(arg: T[]): T[] {
 }
 ```
 
-可将`loggingIdentity`的类型，读作“泛型函数`loggingIdentity`，获取一个类型参数`T`，以及一个为`T`的数组的参数`arg`，而返回一个`T`的数组”（"the generic function `loggingIdentity` takes a type parameter `T`, and an argument `arg` which is an array of `T`s, and returns an array of `T`s"）。在将一个数字数组传递进去时，将获取到一个返回的数字数组，同时`T`将绑定到`number`类型。这就允许将这里的泛型变量`T`作为所处理的类型的一部分，而非整个类型，从而带来更大的灵活性（This allows us to use our generic type variable `T` as part of the types we're working with, rather than the whole type, giving us greater flexibility，这里涉及两个类型，泛型`T`及泛型`T`的数组，因此说`T`是处理类型的部分）。
+可将`loggingIdentity`的类型，读作“通用函数`loggingIdentity`，获取一个类型参数`T`，以及一个为`T`的数组的参数`arg`，而返回一个`T`的数组”（"the generic function `loggingIdentity` takes a type parameter `T`, and an argument `arg` which is an array of `T`s, and returns an array of `T`s"）。在将一个数字数组传递进去时，将获取到一个返回的数字数组，同时`T`将绑定到`number`类型。这就允许将这里的泛型变量`T`作为所处理的类型的一部分，而非整个类型，从而带来更大的灵活性（This allows us to use our generic type variable `T` as part of the types we're working with, rather than the whole type, giving us greater flexibility，这里涉及两个类型，泛型`T`及泛型`T`的数组，因此说`T`是处理类型的部分）。
 
 还可以将同一示例，写成下面这种形式：
 
@@ -105,5 +105,27 @@ function loggingIdentity<T>(arg: Array<T>): Array<T> {
 
 
 ## 泛型（Generic Types）
+
+上一小节中，创建出了通用的、可处理一系列类型的identity函数。本小节中，将就该函数本身的类型，以及如何创建通用接口，进行探索。
+
+通用函数的类型（the type of generic functions）与非通用函数一样，以所列出的类型参数开始，类似与函数的声明：
+
+```typescript
+function identity<T>(arg: T): T {
+    return arg;
+}
+
+let myIdentity: <T>(arg: T) => T = identity;
+```
+
+对于类型中的泛型参数，则可以使用不同的名称，只要与类型变量的数目及类型变量使用顺序一致即可（We could also have used a different name for the generic type parameter in the type, so long as the number of type variables and how the type variables are used line up）。
+
+```typescript
+function identity<T>(arg: T): T {
+    return arg;
+}
+
+let myIdentity: <U>(arg: U) => U = identity;
+```
 
 
