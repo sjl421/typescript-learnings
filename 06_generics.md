@@ -128,4 +128,30 @@ function identity<T>(arg: T): T {
 let myIdentity: <U>(arg: U) => U = identity;
 ```
 
+还可以将该泛型写为某对象字面类型的调用签名（a call signature of an object literal type）：
+
+```typescript
+function identity<T>(arg: T): T {
+    return arg;
+}
+
+let myIdentity: {<T>(arg: T): T} = identity;
+```
+
+这就引入编写首个通用接口（the generic interface）的问题了。这里把上一示例中的对象字面值，改写为接口的形式：
+
+```typescript
+interface GenericIdentityFn {
+    <T>(arg: T): T;
+}
+
+function identity<T>(arg: T) T {
+    return arg;
+}
+
+let myIdentity: GenericIdentityFn = identity;
+```
+
+在类似示例中，可能想要将通用参数，修改为整个接口的一个参数。这样做可获悉是对那些类型进行泛型处理（比如，是`Dictionary<string>`而不只是`Dictionary`）。这样处理可将类型参数暴露给该接口的其它成员（In a similar example, we may want to move the generic parameter to be a parameter of the whole interface. This lets us see what type(s) we're generic over(e.g. `Dictionary<string>` rather than just `Dictionary`). This makes the type parameter visible to all the other members of the interface）。
+
 
