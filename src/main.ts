@@ -17,5 +17,32 @@ function getProperty<T, K extends keyof T>(obj: T, key: K) {
 let x = { a: 1, b: 2, c: 3, d: 4 };
 
 console.log(getProperty(x, "a")); // 没有问题
-getProperty(x, "m"); // 
+
+
+class BeeKeeper {
+    hasMask: boolean;
+}
+
+class ZooKeeper {
+    nametag: string;
+}
+
+class Animal {
+    numLegs: number;
+}
+
+class Bee extends Animal {
+    keeper: BeeKeeper;
+}
+
+class Lion extends Animal {
+    keeper: ZooKeeper;
+}
+
+function createInstance<A extends Animal>(c: new () => A): A {
+    return new c();
+}
+
+createInstance(Lion).keeper.nametag; // 
+createInstance(Bee).keeper.hasMask;
 

@@ -289,6 +289,6 @@ function createInstance<A extends Animal>(c: new () => A): A {
     return new c();
 }
 
-createInstance(Lion).keeper.nametag; // 
+createInstance(Lion).keeper.nametag; // 类型检查， Cannot read property 'nametag' of undefined
 createInstance(Bee).keeper.hasMask;
 ```
