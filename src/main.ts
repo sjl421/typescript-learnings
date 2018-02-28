@@ -1,37 +1,21 @@
 'use strict';
-
-let suits = ["hearts", "spades", "clubs", "diamonds"];
-
-function pickCard (x: {suit: string; card: number;} []): number;
-function pickCard (x: number): {suit: string; card: number;};
-
-function pickCard (x): any {
-    // 
-    //
-    if ( typeof x == "object" ) {
-        let pickedCard = Math.floor (Math.random() * x.length);
-        return pickedCard;
-    }
-
-    // 
-    else if (typeof x == "number") {
-        let pickedSuit = Math.floor(x/13);
-        return { suit: suits[pickedSuit], card: x%13 };
-    }
+interface Lengthwise {
+    length: number;
 }
 
-let myDeck = [{suit: "diamonds", card: 2}, {suit: "spades", card: 10}, {suit: "hearts", card: 4}];
-let pickedCard1 = myDeck[pickCard(myDeck)];
-alert("Card: " + pickedCard1.card + " of " + pickedCard1.suit);
-
-let pickedCard2 = pickCard(15);
-alert("Card: " + pickedCard2.card + " of " + pickedCard2.suit);
-
-
-function identity<T> (arg: T): T {
-    console.log(arg.length);
+function loggingIdentity<T extends Lengthwise>(arg: T): T {
+    console.log(arg.length); // 现在知道`arg`有着一个`.length`属性，因此不再报出错误
     return arg;
 }
 
-console.log(identity<string>("myString"));
-console.log(identity(1));
+loggingIdentity("test");
+
+function getProperty<T, K extends keyof T>(obj: T, key: K) {
+    return obj[key];
+}
+
+let x = { a: 1, b: 2, c: 3, d: 4 };
+
+console.log(getProperty(x, "a")); // 没有问题
+getProperty(x, "m"); // 
+

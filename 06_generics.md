@@ -238,4 +238,57 @@ loggingIdentity(3); // 错误，数字没有`.length`属性
 loggingIdentity({length: 10; value: 3});
 ```
 
+### 在泛型约束中使用类型参数（Using Type Parameter in Generic Constraints）
 
+定义一个受其它类型参数约束的类型参数，也是可以的。比如这里要从一个对象，经由属性名称而获取到某个属性。肯定是要确保不会偶然去获取某个并不存在于该`obj`上的属性，因此就将在两个类型上，加上一条约束（You can declare a type parameter that is constrained by another type parameter. For example, here we'd like to get a property from an object given its name. We'd like to ensure that we're not accidentally grabbing a property that does not exist on the `obj`, so we'll place a constraint between the two types）：
+
+```typescript
+function getProperty<T, K extends keyof T>(obj: T, key: K) {
+    return obj[key];
+}
+
+let x = { a: 1, b: 2, c: 3, d: 4 };
+
+getProperty(x, "m"); // Argument of type '"m"' is not assignable to parameter of type '"a" | "b" | "c" | "d"'. (2345)
+```
+
+### 在泛型中使用类类型（Using Class Types in Generics）
+
+在运用泛型来创建TypeScript的工厂（工厂是一种面向对象编程的设计模式，参见[Design patterns in TypeScript: Factory](https://thedulinreport.com/2017/07/30/design-patters-in-typescript-factory/), [oodesign.com: Factory Pattern](http://www.oodesign.com/factory-pattern.html)）时，有必要通过类的构造函数，对类的类型加以引用（When creating factories in TypeScript using generics, it is necessary to refer to class types by their constructor functions）。比如：
+
+```typescript
+function create<T>(c: { new(): T; }): T {
+    return new c();
+}
+```
+
+下面是一个更为复杂的示例，其使用了原型属性，来推断及约束构造函数与类的类型实例侧之间的关系（A more advanced example uses the prototype property to infer and constrain relationships between the constructor function and the instance side of class types）。
+
+```typescript
+class BeeKeeper {
+    hasMask: boolean;
+}
+
+class ZooKeeper {
+    nametag: string;
+}
+
+class Animal {
+    numLegs: number;
+}
+
+class Bee extends Animal {
+    keeper: BeeKeeper;
+}
+
+class Lion extends Animal {
+    keeper: ZooKeeper;
+}
+
+function createInstance<A extends Animal>(c: new () => A): A {
+    return new c();
+}
+
+createInstance(Lion).keeper.nametag; // 
+createInstance(Bee).keeper.hasMask;
+```
