@@ -154,4 +154,18 @@ let myIdentity: GenericIdentityFn = identity;
 
 在类似示例中，可能想要将通用参数，修改为整个接口的一个参数。这样做可获悉是对那些类型进行泛型处理（比如，是`Dictionary<string>`而不只是`Dictionary`）。这样处理可将类型参数暴露给该接口的其它成员（In a similar example, we may want to move the generic parameter to be a parameter of the whole interface. This lets us see what type(s) we're generic over(e.g. `Dictionary<string>` rather than just `Dictionary`). This makes the type parameter visible to all the other members of the interface）。
 
+```typescript
+interface GenericIdentityFn<T> {
+    (arg: T): T;
+}
+
+function identity<T>(arg: T) T {
+    return arg;
+}
+
+let myIdentity: GenericIdentityFn<number> = identity;
+```
+
+请注意这里的示例已被修改为有一点点的不同了。这里有了一个作为泛型一部分的非通用函数，取代了对一个通用函数的描述。现在使用`GenericIdentityFn`时，就需要明确指明一个对应的类型参数了（这里是`number`），从而有效锁定当前调用签名所具体使用的类型。掌握何时将类型参数直接放在调用签名上，以及何时将其放在接口本身上，对于阐明泛型的各个方面是有帮助的（Instead of describing a generic function, we now have a non-generic function signature that is a part of a generic type. When we use `GenericIdentityFn`, we now will also need to specify the corresponding type argument(here: `number`), effectively locking in what the underlying call signature will use. Understanding when to put the type parameter directly on the call signature and when to put it on the interface itself will be helpful in describing what aspects of a type are generic）。
+
 
