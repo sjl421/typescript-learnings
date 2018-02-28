@@ -196,4 +196,10 @@ stringNumeric.add = function (x, y) { return x + y; };
 alert(stringNumeric.add(stringNumeric.zeroValue, "test"));
 ```
 
+与接口一样，将类型参数放在类本身上，可确保该类的所有属性，都与同一类型进行运作。
+
+如同在[类部分](03_classes.md)所讲到的，类在其类型上有两侧：静态侧与示例侧。通用类则仅在示例侧是通用的，静态侧不具有通用性，因此在使用类时，静态成员无法使用到类的类型参数。
+
+##通用常量（Generic Constraints）
+
 
