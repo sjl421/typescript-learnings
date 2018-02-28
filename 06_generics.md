@@ -200,6 +200,42 @@ alert(stringNumeric.add(stringNumeric.zeroValue, "test"));
 
 如同在[类部分](03_classes.md)所讲到的，类在其类型上有两侧：静态侧与示例侧。通用类则仅在示例侧是通用的，静态侧不具有通用性，因此在使用类时，静态成员无法使用到类的类型参数。
 
-##通用常量（Generic Constraints）
+## 泛型约束（Generic Constraints）
+
+如还记得早先的一个示例，有时候在了解到某些类型集所具备的功能时，而想要编写一个处理类型集的通用函数。在示例`loggingIdentity`中，是打算能够访问到`arg`的`length`属性，但编译器却无法证实每个类型都有`length`属性，因此它就警告无法做出此种假定。
+
+```typescript
+function identity<T>(arg: T): T {
+    console.log(arg.length); // Property 'length' does not exist on type 'T'. (2339)
+    return arg;
+}
+```
+
+为了避免处理任意与所有类型，这里就要将该函数约束为处理有着`length`属性的任意及所有类型。只要类型具有该成员，这里允许该类型，但仍要求该类型至少具备该属性。为了达到这个目的，就必须将这里的要求，作为`T`可以是何种类型的一个约束加以列出。
+
+做法就是，创建出一个描述约束的接口。下面将创建一个具有单一`.length`的接口，并使用该接口及`extends`语句，来表示这里的约束：
+
+```typescript
+interface Lengthwise {
+    length: number;
+}
+
+function loggingIdentity<T extends Lengthwise>(arg: T): T {
+    console.log(arg.length); // 现在知道`arg`有着一个`.length`属性，因此不再报出错误
+    return arg;
+}
+```
+
+因为该通用函数现在已被约束，故其不再对任意及所有类型运作：
+
+```typescript
+loggingIdentity(3); // 错误，数字没有`.length`属性
+```
+
+相反，这里需传入那些具有全部所需属性类型的值：
+
+```typescript
+loggingIdentity({length: 10; value: 3});
+```
 
 
