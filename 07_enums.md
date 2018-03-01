@@ -27,3 +27,22 @@ enum Direction {
     Right,
 }
 ```
+
+此时，`Up`的值将为`0`，`Down`将为`1`，等等。对于那些不会考虑成员值本身的案例，这种自动增加的行为是有用的，不过无需担心在同一枚举中各个值与其它值是各异的。
+
+使用枚举很简单：只要以枚举本身属性的方式，并使用枚举的名称来声明类型，来访问其任何成员即可（Using an enum is simple: just access any member as a property off of the enum itself, and declare types using the name of the enum）。
+
+```typescript
+enum Response {
+    No = 0,
+    Yes,
+}
+
+function respond (recipient: string, message: Response): void {
+    // ...
+}
+
+respond ("Princess Caroline", Response.Yes);
+```
+
+
