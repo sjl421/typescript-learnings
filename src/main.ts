@@ -1,99 +1,48 @@
-import {sayHello} from "./greet"
-
-
-function showHello (divName: string, name: string){
-    const el = document.getElementById(divName);
-    el.innerText = sayHello(name);
+'use strict';
+interface Lengthwise {
+    length: number;
 }
 
-let 
-// 逻辑值（布尔值）, Boolean
-isDone: boolean = false,
-    // 数值, Number。注意：TypeScript里所有数字都是浮点数
-    weight: number = 95.2,
-
-    // 字符串, String。注意：TypeScript支持多行字符串, 及模板语法
-    name: string = "Peng Hailin, Have a good day!",
-    sentence: string = `${name},
-        that's what I wanner say.
-        `,
-
-    // 数组，Array。注意：下面是数组的两种写法
-    list: string[] = ['Peng Hailin', 'Have a good day!'],
-    points: Array<number> = [5, 3.14159, -0.58];
-
-points.forEach((p)=>{
-    sentence = sentence.concat(` ${p.toString()}`);
-});
-
-list.forEach((s)=>{
-    sentence = sentence.concat(` ${s} `);
-});
-
-// 元组，Tuple
-let  x: [string, number];
-
-x = ['height', 181];
-
-console.log(x[0].substr(1));
-console.log(x[1]);
-
-x[3] = 'fat';
-
-x[6] = true; // 这里编译器会报错：（error TS2322: Type 'true' is not assignable to type 'string | number'.）
-
-console.log(x[6].toString());
-
-// 枚举，enum
-enum Color {Red = 1, Green = 2, Blue = 4};
-
-let c: Color = Color.Green;
-let colorName: string = Color[2];
-
-console.log(c, colorName);
-
-// 任意值，any
-let notSure: any = 4;
-// notSure.ifItExists();
-// console.log();
-notSure.toFixed()
-console.log(notSure);
-
-// 对象与任意值的比较
-let prettySure: Object = 4;
-prettySure.toFixed();
-
-
-// 空值，void
-
-function warnUser(): void {
-    alert('This is my warning message.');
+function loggingIdentity<T extends Lengthwise>(arg: T): T {
+    console.log(arg.length); // 现在知道`arg`有着一个`.length`属性，因此不再报出错误
+    return arg;
 }
 
-// undefined 与 null
-let u: undefined = undefined;
-let n: null = null;
+loggingIdentity("test");
 
-let pi: number = undefined;
-console.log(pi);
-
-// never 类型
-function error(message: string): never {
-    throw new Error(message);
+function getProperty<T, K extends keyof T>(obj: T, key: K) {
+    return obj[key];
 }
 
-function fail () {
-    return error('Something failed');
+let x = { a: 1, b: 2, c: 3, d: 4 };
+
+console.log(getProperty(x, "a")); // 没有问题
+
+
+class BeeKeeper {
+    hasMask: boolean;
 }
 
-function infiniteLoop(): never {
-    while(true) {
-    
-    }
+class ZooKeeper {
+    nametag: string;
 }
 
-//fail();
-//infiniteLoop();
+class Animal {
+    numLegs: number;
+}
 
-showHello("greeting", sentence);
+class Bee extends Animal {
+    keeper: BeeKeeper;
+}
+
+class Lion extends Animal {
+    keeper: ZooKeeper;
+}
+
+function createInstance<A extends Animal>(c: new () => A): A {
+    return new c();
+}
+
+createInstance(Lion).keeper.nametag; // 
+createInstance(Bee).keeper.hasMask;
 
