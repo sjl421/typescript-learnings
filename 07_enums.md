@@ -129,7 +129,7 @@ enum FileAccess {
 
 ## 联合枚举与枚举成员类型（Union enums and enum member types）
 
-存在这么一个非计算的常量枚举成员的特殊子集：字面的枚举成员。字面枚举成员是不带有初始值的，或有着被初始化为以下值的常量枚举成员（There is a special subset of constant enum members that aren't calculated: literal enum members. A literal enum member is a constant enum member with no initialized value, or with values that are initialized to）:
+存在这么一个非计算的常量枚举成员的特殊子集： **字面的枚举成员**。字面枚举成员是不带有初始值的，或有着被初始化为以下值的常量枚举成员（There is a special subset of constant enum members that aren't calculated: literal enum members. **A literal enum member** is a constant enum member with no initialized value, or with values that are initialized to）:
 
 - 任意字符串字面值（比如`"foo"`、`"bar"`、`"baz"`）
 - 任意数字的字面值（比如`1`、`100`）
