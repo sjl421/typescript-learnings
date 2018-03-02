@@ -1,22 +1,20 @@
 'use strict';
-
-enum Response {
-    No = 0,
-    Yes,
+enum ShapeKind {
+    Circle,
+    Square,
 }
 
-function respond (recipient: string, message: Response): void {
-    // ...
-    console.log(recipient, message);
+interface Circle {
+    kind: ShapeKind.Circle;
+    radius: number;
 }
 
-respond ("Princess Caroline", Response.Yes);
+interface Square {
+    kind: ShapeKind.Square;
+    sideLength: number;
+}
 
-function getSomeValue():  number { return 100; }
-
-console.log(getSomeValue());
-
-enum E {
-    A = getSomeValue (),
-    B, // 
+let c: Circle = {
+    kind: ShapeKind.Square,
+    radius: 100,
 }

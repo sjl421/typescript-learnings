@@ -1,5 +1,7 @@
 # 枚举（Enums）
 
+Enum [en^m]是源自Enumerate, 意思是一一列举出来。
+
 枚举特性令到定义一个命名常量的集合可行。使用枚举可使得意图表达，或创建差异案例更为容易（Using enums can make it easier to document intent, or create a set of distinct cases）。TypeScript同时支持基于数字与字符串这两种枚举。
 
 ## 数字的枚举（Numeric enums）
@@ -54,7 +56,7 @@ enum E {
 }
 ```
 
-### 字符串枚举（String enums）
+## 字符串枚举（String enums）
 
 字符串枚举的概念相同，但有一些细微的运行时上的不同（runtime differences），后面会有说明。在字符串枚举中，每个成员都必须使用字符串字面值，或其它字符串枚举成员加以初始化。
 
@@ -69,7 +71,7 @@ enum Direction {
 
 虽然字符串枚举不具有自动增加行为，它们却仍然受益于其良好的“连续性”。换句话说，加入正在对程序进行调试，而不得不读取某个数字枚举的运行时值，该值通常是不透明的 -- 该值并不能提供到任何其本身有用的意义（尽管反向映射通常有所帮助），但字符串枚举却允许在代码运行时，独立于枚举成员本身，赋予有意义且可读的值（While string enums don't have auto-incrementing behavior, string enums have the benefit that they "serialize" well. In other words, if you are debugging and had to read the runtime value of a numeric enum, the value is ofter opaque - it doesn't convey any useful meaning on its own(though reverse mapping can often help), string enums allow you to give a meaningful and readable value when your code runs, independent of the name of the enum member itself）。
 
-### 异质枚举（Heterogeneous enums）
+## 异质枚举（Heterogeneous enums）
 
 技术上枚举是可以混合字符串与数字成员的，但这么做似乎没有什么理由：
 
@@ -83,7 +85,7 @@ enum BooleanLikeHeterogeneousEnum {
 除非要以某种明智的方式来利用JavaScript的运行时行为，否则建议不要这样做（Unless you're really trying to take advantage of JavaScript's runtime behavior in a clever way, it's advised that you don't do this）。
 
 
-### 计算的与常量成员（Computed and constant members）
+## 计算的与常量成员（Computed and constant members）
 
 枚举的每个成员，都有着一个与其关联的值，该值可以是 *常量或计算值(constant or computed)*。在以下情况下，枚举成员将被看着是常量：
 
@@ -107,4 +109,59 @@ enum BooleanLikeHeterogeneousEnum {
     2. 对先前定义的常量枚举成员（可以来自不同枚举）的引用 （a reference to previously defined constant enum member(which can originate from a different enum)）
     3. 一个用括号包围的常量枚举表达式（a parentthesized constant enum expression）
     4. 运用到常量枚举表达式的`+`、`-`及`~`三个一元运算符之一（one of the `+`, `-`, `~` unary operators applied to constant enum expression）
-    5. 使用
+    5. 与将常量枚举表达式作为操作数一起的`+`、`-`、`*`、`/`、`%`、`>>`、`<<`、`>>>`、`&`、`|`、`^`等二元运算符
+
+对于结果为`NaN`（Not a Number, 非数值）或`Infinity`（无穷），将作为编译时错误加以对待（It is compile time error for constant enum expressions to be evaluated to `NaN` or `Infinity`）。
+
+那么其它所有情况下，枚举成员都将被看作是计算的（In all other cases enum member is considered computed）。
+
+```typescript
+enum FileAccess {
+    // 常量成员
+    None,
+    Read        = 1 << 1,
+    Write       = 1 << 2,
+    ReadWrite   = Read | Write,
+    // 计算的成员
+    G = "123".length,
+}
+```
+
+## 联合枚举与枚举成员类型（Union enums and enum member types）
+
+存在这么一个非计算的常量枚举成员的特殊子集：字面的枚举成员。字面枚举成员是不带有初始值的，或有着被初始化为以下值的常量枚举成员（There is a special subset of constant enum members that aren't calculated: literal enum members. A literal enum member is a constant enum member with no initialized value, or with values that are initialized to）:
+
+- 任意字符串字面值（比如`"foo"`、`"bar"`、`"baz"`）
+- 任意数字的字面值（比如`1`、`100`）
+- 应用到任意数字字面值的一元减号运算符（比如`-1`、`-100`）
+
+在某个枚举中所有成员都有着字面枚举值时，某些特别的语法就会生效。
+
+第一就是枚举成员还成为了类型！比如，这里可以说某些成员 *只* 能具有某个枚举成员的值（The first is that enum members also become types as well! For example, we can say that certain members can *only* have the value of an enum member）:
+
+```typescript
+enum ShapeKind {
+    Circle,
+    Square,
+}
+
+interface Circle {
+    kind: ShapeKind.Circle;
+    radius: number;
+}
+
+interface Square {
+    kind: ShapeKind.Square;
+    sideLength: number;
+}
+
+let c: Circle = {
+    kind: ShapeKind.Square,
+    // Type '{ kind: ShapeKind.Square; radius: number; }' is not assignable to type 'Circle'.
+    //  Types of property 'kind' are incompatible.
+    // Type 'ShapeKind.Square' is not assignable to type 'ShapeKind.Circle'. (2322)
+    radius: 100,
+}
+```
+
+
