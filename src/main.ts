@@ -12,3 +12,11 @@ function respond (recipient: string, message: Response): void {
 
 respond ("Princess Caroline", Response.Yes);
 
+function getSomeValue():  number { return 100; }
+
+console.log(getSomeValue());
+
+enum E {
+    A = getSomeValue (),
+    B, // 
+}
