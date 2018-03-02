@@ -80,8 +80,31 @@ enum BooleanLikeHeterogeneousEnum {
 }
 ```
 
-除非要以某种明智的方式来利用JavaScript的运行时行为，否则建议不要这样做。
+除非要以某种明智的方式来利用JavaScript的运行时行为，否则建议不要这样做（Unless you're really trying to take advantage of JavaScript's runtime behavior in a clever way, it's advised that you don't do this）。
+
 
 ### 计算的与常量成员（Computed and constant members）
 
+枚举的每个成员，都有着一个与其关联的值，该值可以是 *常量或计算值(constant or computed)*。在以下情况下，枚举成员将被看着是常量：
 
+- 其作为枚举中的第一个成员且没有初始值，这种情况下其就被赋予值`0`：
+
+    ```typescript
+    // E.X 是常量
+    enum E { X }
+    ```
+
+- 没有初始值，且前一个枚举成员是一个 *数字* 常量。这种情况下当前枚举成员的值将是其前一个枚举成员加一。
+
+    ```typescript
+    // `E1`与`E2`中的所有枚举成员都是常量。
+    enum E1 { X, Y, Z }
+    enum E2 { A = 1, B, C }
+    ```
+
++ 以常量枚举表达式（a constant enum expression）初始化的成员。常量枚举表达式是TypeScript表达式的一个子集，在运行时可被完整执行。在满足以下条件是，表达式就是常量枚举表达式：
+    1. 字面的枚举表达式（基本的字符串表达式或数字表达式, a literal enum expression(basically a string literal or a numeric literal)）
+    2. 对先前定义的常量枚举成员（可以来自不同枚举）的引用 （a reference to previously defined constant enum member(which can originate from a different enum)）
+    3. 一个用括号包围的常量枚举表达式（a parentthesized constant enum expression）
+    4. 运用到常量枚举表达式的`+`、`-`及`~`三个一元运算符之一（one of the `+`, `-`, `~` unary operators applied to constant enum expression）
+    5. 使用
