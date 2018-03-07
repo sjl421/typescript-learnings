@@ -164,4 +164,20 @@ let c: Circle = {
 }
 ```
 
+另一改变，就是枚举类型本身，有效地成为各枚举成员的 *联合* 。虽然到这里还没有讨论到 **联合类型** （**union types**），只需知道有了联合枚举，TypeScript的类型系统，就能够利用其对存在于枚举本身中的那些确切值的知悉这一事实。而正由于这一点，TypeScript就能捕捉到那些可能进行不正确地值比较等愚蠢程序错误（The other change is that enum types themselves effectively become a *union* of each enum member. While we havn't discussed **union types** yet, all that you need to know is that with union enums, the type system is able to leverage the fact that it knows the exact set of values that exist in the enum itself. Because of that, TypeScript can catch silly bugs where we might be comparing values incorrectly）。比如：
+
+```typescript
+enum E {
+    Foo,
+    Bar,
+}
+
+function f (x: E) {
+    if ( x !== E.Foo || x !== E.Bar ) {
+        // ~~~~~~~~~~
+        // 
+    }
+}
+```
+
 
