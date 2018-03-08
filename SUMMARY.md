@@ -7,3 +7,4 @@
 * 五、[函数](05_functions.md)
 * 六、[泛型](06_generics.md)
 * 七、[枚举](07_enums.md)
+* 八、[类型推导](08_type_inference.md)
