@@ -1,32 +1,11 @@
 'use strict';
-enum ShapeKind {
-    Circle,
-    Square,
-}
-
-interface Circle {
-    kind: ShapeKind.Circle;
-    radius: number;
-}
-
-interface Square {
-    kind: ShapeKind.Square;
-    sideLength: number;
-}
-
-let c: Circle = {
-    kind: ShapeKind.Square,
-    radius: 100,
-}
 
 enum E {
-    Foo,
-    Bar,
+    X, Y, Z
 }
 
-function f (x: E) {
-    if ( x !== E.Foo || x !== E.Bar ) {
-        // ~~~~~~~~~~
-        // 
-    }
+function f(obj: { X: number }) {
+    return obj.X;
 }
+
+console.log(f(E));

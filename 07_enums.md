@@ -180,4 +180,51 @@ function f (x: E) {
 }
 ```
 
+在该示例中，首先检查了`x`是否不是`E.Foo`。如此检查成功，那么这里的`||`将短路，同时`if`的语句体将得到运行。但是若那个检查不成功，那么`x`就只能是`E.Foo`，因此再来判断其是否等于`E.Bar`就没有意义了（In that example, we first checked whether `x` was *not* `E.Foo`. If that check succeeds, then our `||` will *short-circuit*, and the body of the `if` will get run. However, if the check didn't succed, then `x` can *only* be `E.Foo`, so it doesn't make sense to see whether it's equal to `E.Bar`）。
 
+## 运行时的枚举（Enums at runtime）
+
+运行时存在的枚举，都是真实的对象。比如，下面的这个枚举：
+
+```typescript
+enum E {
+    X, Y, Z
+}
+```
+
+就能被确切地传递给函数：
+
+```typescript
+function f(obj: { X: number }) {
+    return obj.X;
+}
+
+f(E);
+```
+
+## 反向映射（Reverse mappings）
+
+除了创建出一个带有属性名称成员的对象之外，数字枚举成员，还可以得到一个枚举值到枚举名称的 *反向映射* （In addition to creating an object with property names for members, numeric enums members also get a *reverse mapping* from enum values to enum names）。比如，在下面的示例中：
+
+```typescript
+enum Enum {
+    A
+}
+
+let a = Enum.A;
+let nameOfA = Enum[a]; // "A"
+```
+
+TypeScript 会将此编译到类似下面的JavaScript代码：
+
+```javascript
+var Enum;
+(function (Enum) {
+    Enum[Enum["A"] = 0] = "A";
+})( Enum || (Enum = {}) );
+
+var a = Enum.A;
+var nameOfA = Enum[a]; // "A"
+```
+
+在生成的代码中，枚举就被编译成一个同时存储了正向（`name` -> `value`）与逆向（`value` -> `name`）映射的对象中。对其它枚举成员的引用，总是作为属性访问而被省略，且绝不会被内联
