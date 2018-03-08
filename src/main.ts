@@ -18,3 +18,15 @@ let c: Circle = {
     kind: ShapeKind.Square,
     radius: 100,
 }
+
+enum E {
+    Foo,
+    Bar,
+}
+
+function f (x: E) {
+    if ( x !== E.Foo || x !== E.Bar ) {
+        // ~~~~~~~~~~
+        // 
+    }
+}

@@ -175,7 +175,7 @@ enum E {
 function f (x: E) {
     if ( x !== E.Foo || x !== E.Bar ) {
         // ~~~~~~~~~~
-        // 
+        // Operator '!==' cannot be applied to types 'E.Foo' and 'E.Bar'. (2365)
     }
 }
 ```
