@@ -242,4 +242,35 @@ const enum Enum {
 }
 ```
 
+常量枚举只能使用常量枚举表达式，而与常规枚举不一样，它们在编译期间就被完全移除了。在使用到常量枚举的地方，其成员完全是内联的。这可能是因为常量枚举不能拥有计算的成员的关系（Const enums can only use constant enum expressions and unlike regular enums they are completely removed during compilation. Const enum members are inlined at use sites. This is possible since const enums cannot have computed members）。
+
+```typescript
+const enum Directions {
+    Up,
+    Down,
+    Left,
+    Right
+}
+
+let directions = [Directions.Up, Directions.Down, Directions.Left, Directions.Right];
+```
+
+这段代码所对应的编译生成的JavaScript代码将成为：
+
+```javascript
+var directions = [0 /* Up */, 1 /* Down */, 2 /* Left */, 3 /* Right */];
+```
+
+## 周遭枚举（Ambient enums）
+
+周遭枚举用于描述已存在枚举类型的形状（Ambient enums are used to describe the shape of already existing enum types）。
+
+```typescript
+declare enum Enum {
+    A = 1,
+    B,
+    C = 2
+}
+```
+
 
