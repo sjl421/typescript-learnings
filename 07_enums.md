@@ -227,4 +227,19 @@ var a = Enum.A;
 var nameOfA = Enum[a]; // "A"
 ```
 
-在生成的代码中，枚举就被编译成一个同时存储了正向（`name` -> `value`）与逆向（`value` -> `name`）映射的对象中。对其它枚举成员的引用，总是作为属性访问而被省略，且绝不会被内联
+在生成的代码中，枚举就被编译成一个同时存储了正向（`name` -> `value`）与逆向（`value` -> `name`）映射的对象中。对其它枚举成员的引用，总是作为属性访问而被省略，且绝不会被内联（In this generated code, an enum is compiled into an object that stores both forward (`name` -> `value`) and reverse (`value` -> `name`) mappings. References to other enum members are always emitted as property accesses and never inlined）。
+
+请记住字符串的枚举成员，并不会得到一个生成的反向映射（Keep in mind that string enum members *do not* get a reverse mapping generated at all）。
+
+## 常量枚举（`const` enums）
+
+大多数情况下，枚举都是一种相当有效的方案。不过某些时候需求更为紧致。为避免付出额外生成的代码与在访问枚举值时多余的间接性这两个代价，就可以使用常量枚举。所谓常量枚举，就是在枚举上使用`const`这个修饰器，所定义的枚举（In most cases, enums are a perfectly valid solution. However sometimes requirements are tighter. To avoid paying the cost of extra generated code and additional indirection when accessing enum values, it's possible to use `const` enums. Const enums are defined using the `const` modifier on our enums）。
+
+```typescript
+const enum Enum {
+    A = 1,
+    B = A * 2
+}
+```
+
+
