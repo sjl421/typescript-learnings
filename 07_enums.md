@@ -261,9 +261,9 @@ let directions = [Directions.Up, Directions.Down, Directions.Left, Directions.Ri
 var directions = [0 /* Up */, 1 /* Down */, 2 /* Left */, 3 /* Right */];
 ```
 
-## 周遭枚举（Ambient enums）
+## 环境枚举（Ambient enums）
 
-周遭枚举用于描述已存在枚举类型的形状（Ambient enums are used to describe the shape of already existing enum types）。
+环境枚举用于描述已存在枚举类型的形状（Ambient enums are used to describe the shape of already existing enum types）。
 
 ```typescript
 declare enum Enum {
@@ -273,4 +273,4 @@ declare enum Enum {
 }
 ```
 
-
+环境枚举与非环境枚举的一个重要的不同，就是在常规枚举中，不带有初始器的成员，在其前导枚举成员被认为是常量时，将被看作是常量。而与此相比，不带有初始器的环境（且非常量）枚举成员， *始终* 被认为是计算的成员（One important difference between ambient and non-ambient enums is that, in regular enums, members that don't have an initializer will be considered constant if its preceding enum member is considered constant. In contrast, an ambient(and non-const) enum member that does not have initializer is *always* considered computed）。
