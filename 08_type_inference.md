@@ -40,4 +40,26 @@ let zoo = [new Rhino(), new Elephant(), new Snake()];
 let zoo: Animal[] = [new Rhino(), new Elephant(), new Snake()];
 ```
 
+而在找不到最佳通用类型时，推导结果就是联合数组类型（the union array type），`(Rhino | Elephant | Snake)[]`。
+
+## 上下文的类型（Contextual Type）
+
+在TypeScript中，类型推导在某些情况下还以“其它方向”起作用（Type inference also works in "the other direction" in some cases in TypeScript）。这就是所谓的“上下文的赋予类型（contextual typing）”。上下文类型赋予是在某个表达式的类型由其所处位置所决定时，发生的。比如：
+
+```typescript
+window.onmousedown = function (mouseEvent) {
+    console.log(mouseEvent.button); //<- Error
+};
+```
+
+为了从上面的代码中检查出错误，TypeScript的类型检查器使用了`window.onmousedown`函数的类型，类推导该赋值语句右侧的函数表达式的类型（For the code above to give the type error, the TypeScript type checker used the type of the `window.onmousedown` function to infer the type of the function expression on the right hand side of the assignment）。在其这样做的时候，就能够推导出`mouseEvent`参数的类型。而假如该函数表达式并不是在一个上下文类型赋予位置（not in a contextually typed position），那么参数`mouseEvent`将有着类型`any`，从而不会出现任何错误。
+
+而如果上下文类型赋予的表达式（the contextually typed expression）包含了显式的类型信息，那么上下文类型将被忽略。也就是像下面这样写上面的示例：
+
+```typescript
+window.onmousedown = function (mouseEvent: any) {
+    console.log(mouseEvent.button); // <- Now, no error is given
+};
+```
+
 
