@@ -62,4 +62,14 @@ window.onmousedown = function (mouseEvent: any) {
 };
 ```
 
+参数上带有显式类型注记的函数表达式，将覆盖上下文类型。而一旦这样做，就不会报出错误了，因为应用没有上下文类型特性。
 
+在很多情况下，上下文类型赋予都得以应用。常见的包括函数调用的参数、赋值语句的右侧、类型断言、对象的成员与数组字面值，以及返回语句等（Contextual typing applies in many cases. Common cases include arguments to function calls, right hand sides of assignments, type assertions, members of object and array literals, and return statements）。在最佳通用类型中，上下文类型也扮演了一种候选类型。比如：
+
+```typescript
+function createZoo(): Animal[] {
+    return [new Rhino(), new Elephant(), new Snake()];
+}
+```
+
+在此示例中，最佳通用类型有着四种候选类型的集合：`Animal`、`Rhino`、`Elephant`以及`Snake`。其中`Animal`可能会被最佳通用类型算法选中。
