@@ -28,4 +28,16 @@ let x = [0, 1, null];
 
 为推导出上面示例中`x`的类型，就必须考虑各个数组元素的类型。这里给到的该数组类型有两个选择：`number`与`null`。 **最优通用类型算法** 就对各个候选类型加以考虑，并选取那个兼容所有其它候选项的类型（ **the best common type algorithm** considers each candidate type, and picks the type that is compatible with all the other candidates）。
 
+因为必须要从所提供的候选类型选出最优通用类型，那么就有着某些候选类型共享一个通用结构，却并存在一个作为所有候选类型超集的类型的情况。比如：
+
+```typescript
+let zoo = [new Rhino(), new Elephant(), new Snake()];
+```
+
+理想情况下，可能希望将`zoo`推导为一个`Animal[]`，但因为该数组中没有对象是严格的`Animal`类型，所以无法做出有关该数组元素类型的推导。为了纠正这一点，就要在没有一种类型是其它候选类型的超类型时，提供显式地提供一个类型：
+
+```typescript
+let zoo: Animal[] = [new Rhino(), new Elephant(), new Snake()];
+```
+
 
