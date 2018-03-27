@@ -125,4 +125,50 @@ x = y; // 没有问题
 y = x; // 错误，因为`x`缺少一个location属性
 ```
 
+类型系统强制要求 **源函数** 的返回值类型，是 **目标函数** 返回值类型的一个子集（The type system enforces that the source function's return type be a subtype of the target type's return type）。
 
+### 函数参数的双向协变（Funtion Parameter Bi-variance）
+
+在对函数参数的类型进行比较时，加入源参数可被赋值给目标参数，或目标参数可赋值给源参数，那么函数间的赋值将成功。这是不完备的，因为某个调用器可能以被给予一个取更为具体类型的函数，却以不那么具体类型，来触发该函数而结束。在实践中，此类错误很少见，同时此特性带来了很多常见的JavaScript模式（When comparing the types of function parameters, assignment succeeds if either the source parameter is assignable to the target parameter, or vice versa. This is unsound because a caller might end up being given a function that takes a more specialized type, but invokes the funtion with a less specialized type. In practice, this sort of error is rare, and allowing this enables many common JavaScript patterns）。下面是一个简要的示例：
+
+```typescript
+enum EventType { Mouse, Keyboard }
+
+interface Event { timestamp: number; }
+interface MouseEvent extends Event { x: number; y: number }
+interface KeyEvent extends Event { keyCode: number }
+
+function listenEvent (eventType: EventType, handler: (n: Event) => void) {
+    //...
+}
+
+//不完备，却是有用且常见的做法
+listenEvent(EventType.Mouse, (e.MouseEvent) => console.log(e.x + "," + e.y));
+
+// 具备完备性的不可取做法
+listenEvent(EventType.Mouse, (e: Event) => console.log((<MouseEvent>e).x + "," + (<MouseEvent>e>).y);
+listenEvent(EventType.Mouse, <(e: Event) => void>((e: MouseEvent) => console.log(e.x + "," + e.y));
+
+// 下面这样写是仍然不允许的（肯定是错的）。因为完全不兼容类型，而强制开启类型安全（Still disallowed (clear erro). Type safety enforced for wholly incompatible types）
+listenEvent(EventType.Mouse, (e: number) => console.log(e));
+```
+
+### 可选参数与其余参数（Optional Parameters and Rest Parameters）
+
+在出于兼容性而对函数加以比较时，可选参数与必需参数是通用的。源类型的额外可选参数并不是一个错误，同时目标类型的、在源类型中没有对应参数的可选参数也不是一个错误（When comparing functions for compatibility, optional and required parameters are interchangeable. Extra optional parameters of the source type are not an error, and optional parameters of the target type without corresponding parameters in the source type are not an error）。
+
+在某个函数具有其余参数时，其余参数就被当成是有无限个可选参数加以对待（When a function has a rest parameter, it is treated as if it were an infinite series of optional parameters）。
+
+这一点从类型系统角度看是不完备的，但因为对于大多数函数来数，在那个位置传递`undefined`都是等效的，因此从运行时角度，可选参数这一概念通常并不是精心构思的（This is unsound from a type system perspective, but from a runtime point of view the idea of an optional parameter is generally not well-enforced since passing `undefined` in that position is equivalent for most functions）。
+
+下面的示例就是某个取一个回调函数，并以可预测（对于程序员）却未知（对于类型系统）数量的参数来触发该回调函数的函数的常见模式（The motivating example is the common pattern of a function that takes a callback and invokes it with some predictable(to the programmer) but unknown(to the type system) number of arguments）:
+
+```typescript
+function invokeLater(args: any[], callback: (...args: any[]) => void) {
+    /* 以 args 来触发回调函数 */
+}
+
+// 不完备 -- invokeLater "可能" 提供任意数量的参数
+invokeLater([1, 2], (x, y) => console.log(x + ", " + y));
+
+// 
