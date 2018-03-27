@@ -77,5 +77,52 @@ greet(y); // 没有问题
 
 注意这里的`y`有着一个额外的`location`属性，但这并不会造成错误。在对兼容性进行检查时，仅会考虑目标类型（这里也就是`Named`）的那些成员。
 
+该比较过程是递归进行的，对每个成员及子成员进行遍历（This comparison process proceeds recursively, exploring the type of each member and sub-member）。
+
+## 两个函数的比较（Comparing two functions）
+
+可以看出，对原生类型与对象类型的比较是相对直接的，而何种函数应被看着是兼容的这个问题，就牵扯到更多方面了（While comparing primitive types and object types is relatively straightforward, the question of what kinds of functions should be considered is a bit more involved）。下面就以两个仅在参数清单上不同的函数的基本示例开始：
+
+```typescript
+let x = (a: number) => 0;
+let y = (b: number, s: string) => 0;
+
+y = x; // 没有问题
+
+// TSError: ⨯ Unable to compile TypeScript
+// src/main.ts (9,1): Type '(b: number, s: string) => number' is not assignable to type '(a: number) => number'. (2322)
+x = y; // 错误
+```
+
+为检查`x`是否可被赋值给`y`，首先要看看参数清单。`x`中的每个参数，在`y`中都必须有一个类型兼容的参数与其对应。注意参数名称是不考虑的，考虑的仅是它们的类型。在本示例中，函数`x`的每个参数，在`y`中都有一个兼容的参数与其对应，因此该赋值是允许的。
+
+第二个赋值是错误的赋值，因为`y`有着必要的第二个参数，`x`并没有，因此该赋值是不允许的。
+
+对于示例中`y = x`之所以允许“丢弃”参数的原因，在JavaScript中，此种忽略额外函数参数的赋值，实际上是相当常见的。比如`Array#forEach`方法就提供了3个参数给回调函数：数组元素、数组元素的索引，以及所位处的数组。不过，给其一个仅使用首个参数的回调函数，仍然是很有用的：
+
+```typescript
+let items = [1, 2, 3];
+
+// Don't force these extra parameters
+items.forEach((item, index, array) => console.log(item));
+
+// 这样也是可以的
+items.forEach(item => console.log(item));
+```
+
+现在来看看返回值类型是如何加以对待的，下面使用两个仅在放回值类型上有所区别的函数：
+
+```typescript
+let x = () => ({name: "Alice"});
+let y = () => ({name: "Alice", location: "Seattle"});
+
+x = y; // 没有问题
+
+// TSError: ⨯ Unable to compile TypeScript
+// src/main.ts (6,1): Type '() => { name: string; }' is not assignable to type '() => { name: string; location: string; }'.
+//  Type '{ name: string; }' is not assignable to type '{ name: string; location: string; }'.
+//    Property 'location' is missing in type '{ name: string; }'. (2322)
+y = x; // 错误，因为`x`缺少一个location属性
+```
 
 

@@ -1,14 +1,8 @@
 'use strict';
-interface Named {
-    name: string;
-}
+let x = () => ({name: "Alice"});
+let y = () => ({name: "Alice", location: "Seattle"});
 
-// y 所引用的类型是 { name: string; location: string; }
-let y = { name: "Alice", location: "Seattle" };
+x = y; // 没有问题
 
-function greet(n: Named) {
-    alert("Hello, " + n.name);
-}
 
-greet(y);
 
