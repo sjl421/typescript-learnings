@@ -29,5 +29,49 @@ TypeScript的结构化类型系统，是基于JavaScript代码的一般编写方
 
 TypeScript的类型系统，令到一些在编译时无法知晓的操作是安全的。当某个类型系统具备了此种属性时，就说其不是“健全的”。至于TypeScript允许在哪里存在不健全行为，则是被仔细考虑过的，贯穿本文，这里将对这些特性于何处发生，以及它们背后的动机场景，加以解释（TypeScript's type system allows certain operations that can't be known at compile-time to be safe. When a type system has this property, it is said to not be "sound". The places where TypeScript allows unsound behavior were carefully considered, and throughout this document we'll explain where these happen and the motivating scenarios behind them）。
 
+## 开始（Starting out）
 
+TypeScript的结构化类型系统的基本规则，就是在`y`具备与`x`相同成员时，`x`就兼容`y`。比如：
+
+```typescript
+interface Named {
+    name: string;
+}
+
+let x: Named;
+
+// y 所引用的类型是 { name: string; location: string; }
+let y = { name: "Alice", location: "Seattle" };
+
+x = y;
+```
+
+编译器要检查这里的`y`是否可以被赋值给`x`，就会对`x`的各个属性进行检查，以在`y`中找到相应的兼容属性。在本例中，`y`必须具有一个名为`name`的字符串成员。而它确实有这样的一个成员，因此该赋值是允许的。
+
+```typescript
+interface Named {
+    name: string;
+    age: number;
+}
+
+let x: Named;
+
+// y 所引用的类型是 { name: string; location: string; }
+let y = { name: "Alice", location: "Seattle" };
+
+// TSError: ⨯ Unable to compile TypeScript
+// src/main.ts (12,1): Type '{ name: string; location: string; }' is not assignable to type 'Named'.
+//  Property 'age' is missing in type '{ name: string; location: string; }'. (2322)
+x = y;
+```
+
+在对函数调用参数进行检查时，也使用到通用的赋值规则（The same rule for assignment is used when checking function call arguments）：
+
+```typescript
+function greet (n: Named) {
+    alert ("Hello, " + n.name);
+}
+
+greet(y); // 没有问题
+```
 

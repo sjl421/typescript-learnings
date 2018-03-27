@@ -1,19 +1,14 @@
 'use strict';
-
-enum E {
-    X, Y, Z
+interface Named {
+    name: string;
 }
 
-function f(obj: { X: number }) {
-    return obj.X;
+// y 所引用的类型是 { name: string; location: string; }
+let y = { name: "Alice", location: "Seattle" };
+
+function greet(n: Named) {
+    alert("Hello, " + n.name);
 }
 
-console.log(f(E));
+greet(y);
 
-declare enum F {
-    A = 1,
-    B,
-    C = 2
-}
-
-console.log(F.A);
