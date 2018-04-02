@@ -171,4 +171,23 @@ function invokeLater(args: any[], callback: (...args: any[]) => void) {
 // 不完备 -- invokeLater "可能" 提供任意数量的参数
 invokeLater([1, 2], (x, y) => console.log(x + ", " + y));
 
-// 
+// 混乱（x与y实际上是必需的）且无法发现（Confusing ( x and y are actually required ) and undiscoverable ）
+invokeLater([1, 2], (x?, y?) => console.log(x + ", " + y));
+```
+
+### 带过载的函数（Functions with overloads）
+
+当函数有着过载时，那么源类型中的每个过载，在目标类型上都必须有一个兼容的签名与其匹配。这样才能确保目标函数可与源函数所在的同样场合进行调用（When a function has overloads, each overload in the source type must be matched by a compatible signature on the target type. This ensures that the target function can be called in all the same situation as the source function）。
+
+## 枚举的兼容性
+
+枚举与数字兼容，同时数字也与枚举兼容。不同枚举类型的枚举值，被看着是兼容的。比如：
+
+```typescript
+enum Status { Ready, Waiting };
+enum Color { Red, Blue, Green };
+
+let status = Status.Ready;
+status = Color.Green; // 没毛病
+```
+
