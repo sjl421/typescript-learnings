@@ -191,3 +191,58 @@ let status = Status.Ready;
 status = Color.Green; // 没毛病
 ```
 
+## 类的兼容性（Classes）
+
+类的兼容性与对象字面值及接口类似，但有一个例外：类同时有着静态与实例类型（Classes have both a static and an instance type）。在对某个类类型的两个对象进行比较时，仅比较实例的成员。静态成员与构造器并不影响兼容性。
+
+```typescript
+class Animal {
+    feet: number;
+
+    constructor (name: string, numFeet: number) {}
+}
+
+class Size {
+    feet: number;
+
+    constructor (numFeet: number) {}
+}
+
+let a: Animal;
+let s: Size;
+
+a = s; //OK
+s = a; //OK
+```
+
+### 类中的私有与受保护成员
+
+类中的私有与受保护成员，对类的兼容性有影响。在对类的某个实例进行兼容性检查时，如目标类型包含了一个私有成员，那么源类型也必须要有一个从同样类继承的私有成员。与此类似，同样的规则也适用与有着受保护成员的实例。这就令到类可被兼容的赋值给其超类，但却 **不能** 兼容的赋值给那些来自不同继承层次、除此之外有着同样外形的类（This allows a class to be assignment compatible with its super class, but *not* with classes from a different inheritance hierarchy which otherwise have the same shape）。
+
+## 泛型（Generics）
+
+因为TypeScript是一个结构化的类型系统（a structural type system），所以类型参数在作为某成员类型一部分而被消费是，其仅影响最终类型。比如：
+
+```typescript
+interface Empty<T> {}
+
+let x: Empty<number>;
+let y: Empty<string>;
+
+x = y; //没有问题，y 与 x 的解构匹配
+```
+
+在上面的代码中，`x`与`y`是兼容的，因为它们的解构没有以各异的方式来使用那个类型参数。如通过加入一个成员到`Empty<T>`中，而对此示例进行修改，就可以反映出这一点：
+
+```typescript
+interface NotEmpty<T> {
+    data: T;
+}
+
+let x: NotEmpty<number>;
+let y: NotEmpty<string>;
+
+x = y; //错误，x 与 y 不兼容
+```
+
+
