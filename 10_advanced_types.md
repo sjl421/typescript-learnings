@@ -92,4 +92,58 @@ let indentedString = padLeft("Hello world", true); // 这时在编译时就会�
 
 联合类型将某个值描述为可以是多个类型的某一种。使用竖杠`|`来将各个类型分开，那么`number | string | boolean`就是说某个值的类型，可以是一个`number`、`string`或者`boolean`。
 
+加入有着一个带有联合类型的值，那么就只能访问那些在联合中所有类型都具备的成员（If we have a value that has a union type, we can only access members that are common to all types in the union）。
+
+```typescript
+interface Bird {
+    fly();
+    layEggs();
+}
+
+interface Fish {
+    swim();
+    layEggs();
+}
+
+function getSmallPet(): Fish | Bird {
+    // ...
+}
+
+let pet = getSmallPet();
+
+pet.layEggs(); // 没有问题
+pet.swim(); // 错误
+```
+
+这里联合类型就有些摸不着头脑了，不过只需要一些直觉，就可以习惯它。加入某个值有着类型`A | B`，那就唯一能 **明确** 的是，它有着`A` **与** `B` 都有的成员。在本示例中，`Bird`有一个名为`fly`的成员。这里无法确定某个类型为`Bird | Fish`的变量具有`fly`的方法。如果运行时该变量实际上是`Fish`，那么调用`pet.fly()`就将失败。
+
+## 类型保护与区分类型（Type Guards and Differentiating Types）
+
+当某些值可能在它们所承载的类型上出现重叠时，联合类型对于这些情况下的建模是有用的。那么当需要明确知道是否有着一个`Fish`时，会发生什么呢？JavaScript中区分两个可能的值的习惯做法，就是对是否存在某个成员进行检查。如上面所提到的，只能访问到那些保证位于联合类型的所有构成类型中成员（Union types are useful for modeling situations when values can overlap in the types they can take on. What happens when we need to know specifically whether we have a `Fish`? A common idiom in JavaScript to differentiate between two possible values is to check for the presence of a member. As we mentioned, you can only access members that are guaranteed to be in all the constituents of a union type）。
+
+```typescript
+let pet = getSmallPet();
+
+// 这些属性访问都将引发错误
+if (pet.swim) {
+    pet.swim();
+}
+else if (pet.fly) {
+    pet.fly();
+}
+```
+
+为让同样的代码工作，就需要使用类型断言（a type assertion）:
+
+```typescript
+let pet = getSmallPet();
+
+if ((<Fish>pet).swim) {
+    (<Fish>pet).swim();
+}
+else {
+    (<Bird>pet).fly();
+}
+```
+
 
