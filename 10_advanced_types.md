@@ -177,6 +177,28 @@ else {
 
 ### `typeof`的类型保护（`typeof` type guards）
 
+现在来回头写一下使用联合类型版本的`padLeft`。可像下面这样使用类型谓词加以编写：
 
+```typescript
+function isNumber(x: any): x is number {
+    return typeof x === "number";
+}
 
+function isString(x: any): x is string {
+    return typeof x === "string";
+}
+
+function padLeft (value: string, padding: string | number) {
+    if (isNumber(padding)) {
+        return Array(padding + 1).join("  ") + value;
+    }
+    if (isString(padding)) {
+        return padding + value;
+    }
+
+    throw new Error(`Expected string or number, got '${padding}'`);
+}
+```
+
+但是，这里不得不去定义一个函数来判断某个原生类型就太痛苦了。幸运的是，
 
