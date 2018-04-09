@@ -146,4 +146,37 @@ else {
 }
 ```
 
+### 用户定义的类型保护（User-Defined Type Guards）
+
+请注意上面必须要使用多次的类型断言。如果在一旦完成检查，就可以知晓各个分支中`pet`的类型，那就会好很多（Notice that we had to use type assertion several times. It would be much better if once we performed the check, we could know the type of `pet` within each branch）。
+
+因为TypeScript有着名为 *类型保护（type guard）*特性，那么很容易做到了。类型保护一些执行运行时检查的表达式，用以确保类型出于特定范围。要定义一个类型保护，只需定定义一个返回值为 *类型谓词* 的函数即可（It just so happens that TypeScript has something called a *type guard*. A type guard is some expression that performs a runtime check that guarantees the type in some scope. To define a type guard, we simply need to define a function whose return type is a *type perdicate*）。
+
+```typescript
+function isFish(pet: Fish | Bird): pet is Fish {
+    return (<Fish>pet).swim !== undefined;
+}
+```
+
+`pet is Fish`就是该示例中的类型谓词。谓词的形式就是`parameterName is Type`，其中的`parameterName`必须是当前函数签名中某个参数的名称。
+
+现在只要以某个变量对`isFish`进行调用，如果初始类型兼容，那么TypeScript就会将那个变量 *缩小* 到特定类型（Any time `isFish` is called with some variable, TypeScript will *narrow* that variable to that specific type if the original type is compatible）。
+
+```typescript
+// 现在对`swim`与`fly`的调用都没有问题了
+
+if (isFish(pet)) {
+    pet.swim();
+}
+else {
+    pet.fly();
+}
+```
+
+请注意TypeScript不仅知道`if`分支语句中的`pet`是一个`Fish`；它还知道在`else`分支语句中，在不是`Fish`时，那么就肯定是`Bird`了。
+
+### `typeof`的类型保护（`typeof` type guards）
+
+
+
 
