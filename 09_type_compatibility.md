@@ -245,4 +245,28 @@ let y: NotEmpty<string>;
 x = y; //错误，x 与 y 不兼容
 ```
 
+这种情况下，有着上面这种指定类型参数的泛型，与一个非通用类型的表现一致（In this way, a generic type that has its type arguments specified acts just like a non-generic type）。
 
+对于没有指定类型参数的泛型，兼容性的检查，是通过在所有未指定类型参数的地方指定`any`进行的。随后对最终类型进行兼容性检查，就跟非通用类型一样（For generic types that do not have their type arguments specified, compatibility is checked by specifying `any` in place of all unspecified type arguments. Then resulting types are then checked for compatibility, just as in the non-generic case）。
+
+比如，
+
+```typescript
+let identity = function<T>(x: T): T {
+    //...
+}
+
+let reverse = function<U>(y: U): U {
+    //...
+}
+
+identity = reverse; //没有问题，因为(x: any)=>any 与(y: any)=>any是匹配的
+```
+
+## 高级话题（Advanced Topics）
+
+### 子类型与赋值语句（Subtype vs Assignment）
+
+到目前为止，都使用的是“兼容性”一词，但这个说法在语言规格中并没有对其进行定义。在TypeScript中，兼容有两种：子类型与赋值。它们的不同仅在于赋值以允许赋值给与从`any`，以及赋值给及从有着对应的数字值的枚举，这两个规则，对子类型进行了拓展（In TypeScript, there are two kinds of compatibility: subtype and assignment. These differ only in that assignment extends subtype compatibility with rules to allow assignment to and from `any` and to and from enum with corresponding numeric values）。
+
+根据不同情况，语言中的不同地方会使用这两种兼容性机制之一。实际来看，就算有着`implements`及`extends`关键字，类型兼容性仍按赋值兼容性看待（Different places in the language use one of the two compatibility mechanisms, depending on the situation. For practical purposes, type compatibility is dicated by assignment compatibility even in the cases of the `implements` and `extends` clauses）。更多信息，请查阅TypeScript规格。
