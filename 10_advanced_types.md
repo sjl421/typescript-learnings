@@ -200,5 +200,69 @@ function padLeft (value: string, padding: string | number) {
 }
 ```
 
-但是，这里不得不去定义一个函数来判断某个原生类型就太痛苦了。幸运的是，
+但是，这里不得不去定义一个函数来判断某个原生类型就太痛苦了。幸运的是，因为TypeScript本身就可以将`typeof x === "number"`识别为类型保护，所以无需将其抽象到其本身的函数中。那就意味着可将这些检查写在行内（That means we could just write these checks inline）。
 
+```typescript
+function padLeft(value: string, padding: string | number) {
+    if (typeof padding === "number") {
+        return Array(padding + 1).join("  ") + value;
+    }
+    if (typeof padding === "string") {
+        return padding + value;
+    }
+    throw new Error(`Expected string or number, got '${padding}'`);
+}
+```
+
+这些 *`typeof` 的类型保护* 被以两种形式加以识别：`typeof v === "typename"` 与 `typeof v !== "typename"`，其中的`typename`必须是`"number"`、`"string"`、`"boolean"`或`"symbol"`。尽管TypeScript不会阻止与其它字符串进行对比，但语言不会将这些表达式作为类型保护加以识别。
+
+### `instanceof`的类型保护
+
+在了解了有关`typeof`类型保护后，并熟悉JavaScript中的`instanceof`运算符的话，那么对本小节的内容就有了个大概了解了。
+
+*`instanceof` 类型保护* 是一种使用构造函数来限定类型的方式（ *`instanceof` type guards* are a way of narrowing types using their constructor function ）。下面借用之前的生产中的字符串追加器实例来做说明：
+
+```typescript
+interface Padder {
+    getPaddingString(): string
+}
+
+class SpaceRepeatingPadder implements Padder {
+    constructor (private numSpaces: number) {  }
+
+    getPaddingString () {
+        return Array(this.numSpaces + 1).join("  ");
+    }
+}
+
+class StringPadder implements Padder {
+    constructor (private value: string) {}
+
+    getPaddingString () {
+        return this.value;
+    }
+}
+
+function getRandomPadder () {
+    return Math.random() < 0.5 ?
+        new SpaceRepeatingPadder (4) :
+        new StringPadder("  ");
+}
+
+// 类型是 `SpaceRepeatingPadder | StringPadder`
+let padder: Padder = getRandomPadder();
+
+if ( padder instanceof SpaceRepeatingPadder ) {
+    padder; // 类型被限定为 `SpaceRepeatingPadder`
+}
+
+if ( padder instanceof StringPadder ) {
+    padder; // 类型被限定为`StringPadder`
+}
+```
+
+`instanceof`的右侧需要是构造函数，而TypeScript将把变量限定为（The right side of the `instanceof` needs to be a constructor function, and TypeScript will narrow down to）:
+
+1. 在该函数的`prototype`属性类型不是`any`时，该函数的`prototype`属性类型（the type of the function's `prototype` property if its type is not `any`）
+
+2. 该函数`prototype`属性类型的构造签名所返回的类型联合（the union of types returned by that type's construct signatures）
