@@ -366,3 +366,25 @@ function fixed(name: string | null): string {
 因为编译器无法消除嵌套函数内部的空值（除了那些立即执行函数表达式外），因此该示例使用了一个嵌套函数。而编译器之所以无法消除嵌套函数内的空值，是因为编译器无法对所有的嵌套函数调用进行追踪，尤其是在外层函数内返回嵌套函数时。由于编译器在不知道嵌套函数在何处调用，那么它就无法知道函数体执行时`name`的类型会是什么（The example uses a nested function here because the compiler can't eliminate nulls inside a nested function(except immediately-invoked function expressions). That's because it can't track all calls to the nested function, especially if you return it from the outer function. Without knowing where the function is called, it can't know what the type of `name` will be at the time the body executes）。
 
 
+## 类型别名（Type Aliases）
+
+类型别名特性，为某个类型创建出一个新的名称。类型别名有时与接口类似，但可以对原生类型、联合类型、元组及其它不得不手写的类型进行命名（Type aliases create a new name for a type. Type aliases are sometimes similar to interfaces, but can name primitives, unions, tuples, and any other types that you'd otherwise have to write by hand）。
+
+```typescript
+type Name = string;
+type NameResolver = () => string;
+type NameOrResolver = Name | NameResolver;
+
+function getName (n: NameOrResolver): Name {
+    if ( typeof n === "string" ) {
+        return n;
+    }
+    else {
+        return n();
+    }
+}
+```
+
+命名操作并不会直接创建出一个新类型 -- 其创建出一个到那个类型引用的 *名称* （Aliasing doesn't actually create a new type - it creates a new *name* to refer to that type）。对原生类型的重命名并不十分有用，不过这可用作一种程序文档的形式。
+
+
