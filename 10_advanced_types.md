@@ -266,3 +266,103 @@ if ( padder instanceof StringPadder ) {
 1. 在该函数的`prototype`属性类型不是`any`时，该函数的`prototype`属性类型（the type of the function's `prototype` property if its type is not `any`）
 
 2. 该函数`prototype`属性类型的构造签名所返回的类型联合（the union of types returned by that type's construct signatures）
+
+并按二者的先后顺序进行。
+
+## 可为空值的类型（Nullable types）
+
+TypeScript有两种特别的类型，`null`与`undefined`，相应地有着空值与未定义值。在[基本类型章节](00_basic_data_types.md)对它们进行了简要介绍。默认情况下，类型检查器认为`null`与`undefined`可被赋值给任何变量。对于所有类型，`null`与`undefined`都是有效的值。那就意味着，要 *阻止* 将它们赋值给各种类型，即使有意这样做，都是不可能的。`null`值的发明者，Tony Hoare, 把这一特性，称之为他的[“十亿美元错误”](https://en.wikipedia.org/wiki/Null_pointer#History)。
+
+编译器的`--strictNullChecks`开关可修正这一点：在声明某个变量时，它就不自动包含`null`或`undefined`了。要显式地包含它们，可使用联合类型：
+
+```typescript
+let s = "foo";
+s = null; // 错误，`null` 无法赋值给`string`
+
+let sn: string | null = "bar";
+sn = null; // 没有问题
+
+sn = undefined; // 错误，`undefined` 无法赋值给 `string | null`
+```
+
+请留意TypeScript是以不同方式来对待`null`与`undefined`的，这是为了与JavaScript的语义相匹配。`string | null`与`string | undefined` 及`string | undefined | null`是不同的类型。
+
+### 可选参数与属性（Optional parameters and properties）
+
+在开启`--strictNullChecks`编译选项时，可选参数将自动加上`| undefined`：
+
+```typescript
+function f(x: number, y?: number) {
+    return x + (y || 0);
+}
+
+f(1, 2);
+f(1);
+f(1, undefined);
+f(1, null); //错误，`null`不能赋值给`number | undefined`
+```
+
+对于可选属性，这也是适用的：
+
+```typescript
+class C {
+    a: number;
+    b?: number;
+}
+
+let c = new C();
+c.a = 12;
+c.a = undefined; // 错误，`undefined`不能赋值给`number`
+c.b = 13;
+c.b = undefined;
+c.b = null; // 错误，`null` 无法赋值给`number | undefined`
+```
+
+### 类型保护与类型断言（Type guards and type assertions）
+
+因为可为空值类型，是以联合（a union）实现的，那么就需要使用类型保护来处理`null`。幸运的是，这与在JavaScript中所写的代码一样：
+
+```typescript
+function f (sn: string | null): string {
+    if (sn == null) {
+        return "default";
+    }
+    else {
+        return sn;
+    }
+}
+```
+
+这里`null`的排除是相当直观的，但也可以使用更简洁的运算符：
+
+```typescript
+function f (sn: string | null): string {
+    return sn || "default";
+}
+```
+
+在那些编译器无法消除`null`或`undefined`的地方，可使用类型断言运算符（the type assertion operator）来手动移除它们。该语法就是后缀`!`的使用: `identifier!`将从`identifier`的类型中移除`null`与`undefined`：
+
+```typescript
+function broken(name: string | null): string {
+    function postfix(epithet: string) {
+        return name.charAt(0) + '. the ' + epithet; // 错误，`name` 可能是`null`
+    }
+
+    name = name || "Bob";
+    return postfix("great");
+}
+
+function fixed(name: string | null): string {
+    function postfix(epithet: string) {
+        return name!.charAt(0) + '. the ' + epithet; // 没有问题
+    }
+
+    name = name || "Bob";
+    return postfix("great");
+}
+```
+
+因为编译器无法消除嵌套函数内部的空值（除了那些立即执行函数表达式外），因此该示例使用了一个嵌套函数。而编译器之所以无法消除嵌套函数内的空值，是因为编译器无法对所有的嵌套函数调用进行追踪，尤其是在外层函数内返回嵌套函数时。由于编译器在不知道嵌套函数在何处调用，那么它就无法知道函数体执行时`name`的类型会是什么（The example uses a nested function here because the compiler can't eliminate nulls inside a nested function(except immediately-invoked function expressions). That's because it can't track all calls to the nested function, especially if you return it from the outer function. Without knowing where the function is called, it can't know what the type of `name` will be at the time the body executes）。
+
+
