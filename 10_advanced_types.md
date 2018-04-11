@@ -387,4 +387,35 @@ function getName (n: NameOrResolver): Name {
 
 命名操作并不会直接创建出一个新类型 -- 其创建出一个到那个类型引用的 *名称* （Aliasing doesn't actually create a new type - it creates a new *name* to refer to that type）。对原生类型的重命名并不十分有用，不过这可用作一种程序文档的形式。
 
+与接口一样，类型别名也可以是泛型的（通用的） -- 可仅加上类型参数，并在别名声明的右侧使用即可。
+
+```typescript
+type Container<T> = { value: T };
+```
+
+还可以在属性中引用类型别名本身：
+
+```typescript
+type Tree<T> {
+    value: T;
+    left: Tree<T>;
+    right: Tree<T>;
+}
+```
+
+当与交集类型一起时，就可以做出一些相当令人费解的类型：
+
+```typescript
+type LinkedList<T> = T & { next: LinkedList<T> };
+
+interface Person {
+    name: string;
+}
+
+var people: LinkedList<Person>;
+var s = people.name;
+var s = people.next.name;
+var s = people.next.next.name;
+var s = people.next.next.next.name;
+```
 
