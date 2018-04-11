@@ -419,3 +419,32 @@ var s = people.next.next.name;
 var s = people.next.next.next.name;
 ```
 
+但是，要将类型别名放在声明右侧的任意地方，是不可能的：
+
+```typescript
+type Yikes = Array<Yikes>; //错误
+```
+
+### 接口与类型别名（Interfaces vs. Type Aliases）
+
+如前面所提到的，类型别名能表现得有点像接口那样；但类型别名与接口也有着些许不同。
+
+一个差异在于接口创建出在所有地方使用的新名称。而类型别名并不会创建出新名称 -- 举例来说，错误消息就不会使用别名。在下面的代码里，如在代码编辑器中鼠标悬挺在`interfaced`上，就会提示其返回的是一个`Interface`，但对于`aliased`，则将提示返回的是对象字面值类型（object literal type）。
+
+```typescript
+type Alias = { num: number }
+interface Interface {
+    num: number;
+}
+
+declare function aliased (arg: Alias): Alias;
+declare function interfaced (arg: Interface): Interface;
+```
+
+第二个重要的不同，就是类型别名不能被扩展或被实施（它们也不能扩展或实施其它类型，A second important difference is that type aliases cannot be extended or implemented from(nor can they extend/implement other types)）。由于[软件的理想属性，在于对扩展始终开放](https://en.wikipedia.org/wiki/Open/closed_principle)，因此应尽可能使用接口，而不是类型别名。
+
+反过来说，在无法使用接口类表达某个外形（建模）及需要使用联合或元组类型时，往往就是类型别名派上用场的时候。
+
+## 字符串字面类型（String Literal Type）
+
+
