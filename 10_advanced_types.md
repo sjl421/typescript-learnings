@@ -447,4 +447,75 @@ declare function interfaced (arg: Interface): Interface;
 
 ## 字符串字面类型（String Literal Type）
 
+字符串字面类型特性，允许给某个字符串指定其所肯定具有的准确值（String literal types allow you to specify the exact value a string must have）。实践中的字符串字面类型，与联合类型、类型保护及类型别名等有很好的结合。可一并使用这些特性，从而获得字符串的类似于枚举的表现。
+
+```typescript
+type Easing = "ease-in" | "ease-out" | "ease-in-out";
+
+class UIElement {
+    animate(dx: number, dy: number, easing: Easing) {
+        if ( easing === "ease-in" ) {
+            // ...
+        }
+        else if ( easing === "ease-out" ) {
+            // ...
+        }
+        else if ( easing === "ease-in-out" ) {
+            // ...
+        }
+        else {
+            // 错误！不会传入 `null` 或 `undefined`
+        }
+    }
+}
+
+let button = new UIElement();
+button.animate(0, 0, "ease-in");
+button.animate(0, 0, "uneasy"); // 错误： `uneasy`是不允许的
+```
+
+可传入三个允许字串的任意一个，但任何其它字符串的传入，都将导致错误：
+
+```sh
+`"uneasy"`类型的参数不能指派给类型`"ease-in" | "easy-out" | "easy-in-out"`的参数
+```
+
+字符串字面值类型还可以同样方式，用于区分加载元素（String literal types can be used in the same way to distinguish overloads）：
+
+```typescript
+function createElement (tagName: "img"): HTMLImageElement;
+function createElement (tagName: "input"): HTMLInputElement;
+// ... 更多的加载元素 ...
+function createElement (tagName: string): Element {
+    // ... 这里是代码 ...
+}
+```
+
+## 数字字面值类型（Numeric Literal Types）
+
+TypeScript 也具有数字字面值类型。
+
+```typescript
+function rollDie(): 1 | 2 | 3 | 4 | 5 | 6 {
+    // ...
+}
+```
+
+很少显式地写数字字面值类型，在使用数字字面值类型来缩小范围，从而可捕获程序错误时，此特性就有用处：
+
+```typescript
+function foo (x: number) {
+    if ( x !== 1 || x !== 2 ) {
+        //          ~~~~~~~
+        // 运算符 `!==` 不能应用在类型 `1` 与 `2` 上
+    }
+}
+```
+
+也就是说，`x` 在与`2`进行比较时，`x`必定为 `1`, 这意味着上面的检查造成了无效的比较。
+
+## 枚举成员类型（Enum Member Types）
+
+如同在[枚举章节](07_enums.md)所提到的，当所有枚举成员都有字面值初始化时，枚举成员就具有类型（As mentioned in [our section on enums](07_enums.md), enum members have types when every member is literal-initialized）。
+
 
