@@ -518,4 +518,132 @@ function foo (x: number) {
 
 如同在[枚举章节](07_enums.md)所提到的，当所有枚举成员都有字面值初始化时，枚举成员就具有类型（As mentioned in [our section on enums](07_enums.md), enum members have types when every member is literal-initialized）。
 
+在谈及“单例类型”时，大部分都指的是枚举成员类型与数字/字符串字面值类型，虽然很多人都会将“单例类型”与“字面值类型”混用（Much of the time when we talk about "singleton types", we're referring to both enum member types as well as numeric/string literal types, though many users will use "singleton types" and "literal types" interchangeably）。
+
+## 可辨识联合（Dicriminated Unions）
+
+可将单体类型、联合类型、类型保护及类型别名结合起来，构建出一种名为 *可辨识联合*，也叫作 *标签联合* 或 *代数数据类型* 的复杂模式。可辨识联合在函数式编程中是有用的。一些编程语言会对联合进行自动辨识；但TypeScript是在JavaScript模式上构建可辨识联合的，因为这些JavaScript模式业已存在。可辨识联合有以下三种成分（You can combine singleton types, union types, type guards, and type aliases to build an advanced pattern called *dicriminated unions*, also known as *tagged unions* or *algebraic data types*. Discriminated unions are useful in functional programming. Some languages automatically discriminate unions for you; TypeScript instead builds on JavaScript patterns as they exist today. There are three ingredients）：
+
+1. 具有共同的、单体类型属性的一些类型 -- 辨识依据（Types that have a common, singleton type property - the *discrimainant*）
+
+2. 一个这些类型联合的类型别名 -- 联合（A type alias that takes the union of those types - the *union*）
+
+3. 共同属性上的类型保护（Type guards on the common property）
+
+```typescript
+interface Square {
+    kind: "square";
+    size: number;
+}
+interface Rectangle {
+    kind: "rectangle";
+    width: number;
+    height: number;
+}
+interface Circle {
+    kind: "circle";
+    radius: number;
+}
+```
+
+这里首先声明了一些将在联合中使用到的一些接口。注意每个接口都具备一个有着不同字符串字面值的`kind`属性。该`kind`属性就被成为 *辨识依据（discriminant）* 或 *标签（tag）*。其它属性则是特定于不同接口的。注意此时这些接口都还未联系起来。那么下面就将它们放入到一个联合中：
+
+```typescript
+type Shape = Square | Rectangle | Circle;
+```
+
+现在对该可辨识联合加以使用：
+
+```typescript
+function area (s: Shape) {
+    switch ( s.kind ) {
+        case "square": return s.size * s.size;
+        case "rectangle": return s.width * s.height;
+        case "circle": return Math.PI * s.radius ** 2;
+    }
+}
+```
+
+### 全面性检查（Exhaustiveness checking）
+
+在没有涵盖到可辨识联合的全部变种时，如果编译器能予以提示，那就再好不过了。比如，在将`Triangle`加入到`Shape`后，就需要同时更新`area`：
+
+```typescript
+type Shape = Square | Rectangle | Circle | Triangle;
+
+function area (s: Shape) {
+    switch ( s.kind ) {
+        case "square": return s.size * s.size;
+        case "rectangle": return s.width * s.height;
+        case "circle": return Math.PI * s.radius ** 2;
+    }
+    // 这里因该报错 -- 因为并未处理“triangle”情况
+}
+```
+
+要达到此目的，有两种方式。第一个就是开启`--strictNullChecks`编译选项，并为该函数指定一个返回值类型：
+
+```typescript
+function area (s: Shape): number { // 错误：返回 `number | undefined` （因为三角形时将返回 undefined）
+    switch (s.kind) {
+        case "square": return s.size * s.size;
+        case "rectangle": return s.width * s.height;
+        case "circle": return Math.PI * s.radius ** 2;   
+    }
+}
+```
+
+因为`switch`已不全面，所以TypeScript就注意到某些时候函数`area`将返回`undefined`。在使用了显式的`number`返回类型时，就会得到编译器给出的返回值类型为`number | undefined`的报错。当这种方式有些微妙，同时`--strictNullChecks`对于旧代码也并不总是管用。
+
+第二种方式使用了可被编译器用来对完备性进行检查的`never`类型（The second method uses the `never` type that the compiler uses to check for exhaustiveness）:
+
+```typescript
+function assertNever (x: never): never {
+    throw new Error ("Unexpected object: " + x);
+}
+
+function area (s: Shape) {
+    switch ( s.kind ) {
+        case "square": return s.size * s.size;
+        case "rectangle": return s.width * s.height;
+        case "circle": return Math.PI * s.radius ** 2;
+        default: return assertNever(s); // 如有漏掉的情形，这里就会出现错误
+    }
+}
+```
+
+这里的`assertNever`函数检查`s`为`never`类型 -- 即在排除了所有其它情形后剩下的类型（Here, `assertNever` checks that `s` is of type `never` -- the type's left after all other cases have been removed）。如果忘掉某个情形，那么`s`将具有真实的类型，就将得到一个类型错误。此方式需要定义一个额外函数，不过在忘掉某个情形时，这种方式要直观得多。
+
+## 多态`this`类型（Polymorphic `this` types）
+
+多态`this`类型，代表的是包含`this`的类或接口的一个 *子类型* 。这被称为F-边界多态。此特性好处在于，比如令到更易于表达层次化的流式接口。下面是一个在每次操作后都返回`this`的一个简单的计算器代码（A polymorphic `this` type represents a type that is the *subtype* of the containing class or interface. This is called F-bounded polymorphism. This makes hierarchical fluent interfaces much easier to express, for example. Take a simple calculator that return `this` after each operation）：
+
+```typescript
+class BasicCalculator {
+    public constructor ( protected value: number = 0 ) {}
+
+    public currentValue (): number {
+        return this.value;
+    }
+
+    public add ( operand: number ): this {
+        this.value += operand;
+        return this;
+    }
+
+    public multiply ( operand: number ): this {
+        this.value *= operand;
+        return this;
+    }
+
+
+    // ... 这里是其它运算 ...
+}
+
+let v = new BasicCalculator (2)
+            .multiply(5)
+            .add(1)
+            .currentValue();
+```
+
 
