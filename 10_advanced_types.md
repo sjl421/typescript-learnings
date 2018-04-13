@@ -729,4 +729,108 @@ let age: number = getProperty(person, 'age');
 let unkown = getProperty(person, 'unknown'); // 错误，'unkown'不在 `'name' | 'age'`中
 ```
 
+## 索引类型与字符串索引签名（Index types and string index signatures）
+
+`keyof`与`T[K]`都作用于 **字符串索引签名**。如有一个带有字符串索引签名的类型，那么`keyof T`就仅仅是`string`。同时`T[string]`也仅仅是该索引签名的类型（`keyof` and `T[K]` interact with **string index signatures**. If you have a type with a string index signature, `keyof T` will just be `string`. And `T[string]` is just the type of the index signature）。
+
+```typescript
+interface Map<T> {
+    [key: string]: T;
+}
+
+let keys: keyof Map<number>; // 字符串
+let values: Map<number>['foo']; // 数字
+```
+
+## 映射的类型（Mapped types）
+
+使用既有类型并令到其各个属性可选，是一项很常见的任务（A common task is to take an existing type and make each of its properties optional）：
+
+```typescript
+interface PersonPartial {
+    name?: string;
+    age?: number;
+}
+```
+
+或者可能想要一个只读版本：
+
+```typescript
+interface PersonPartial {
+    readonly name: string;
+    readonly age: number;
+}
+```
+
+因为在JavaScript或出现很多这种情况，因此TypeScript提供了一种基于原有类型来创建新类型的方式 -- **映射的类型**（This happens often enough in JavaScript that TypeScript provides a way to create new types based on old types -- **mapped types**）。在映射的类型中，新类型对原有类型中的各个属性，都以同样方式进行转换。比如，可将所有属性，都成为`readonly`的或可选的。下面是两个示例：
+
+```typescript
+type Readonly<T> = {
+    readonly [P in keyof T]: T[P];
+}
+
+type Partial<T> = {
+    [P in keyof T]? T[P];
+}
+```
+
+下面是用法：
+
+```typescript
+type PersonPartial = Partial<Person>;
+type ReadonlyPerson = Readonly<Person>;
+```
+
+来看看下面这个最简单的映射类型及其构成（Let's take a look at the simplest mapped type and its parts）：
+
+```typescript
+type Keys = 'option1' | 'option2';
+type Flags = { [K in Keys]: boolean };
+```
+
+该语法酷似那种内部带有`for .. in`的索引签名语法（The syntax resembles the syntax for index signatures with a `for .. in` inside）。其有着三个构成部分：
+
+1. 类型变量`K`，其将依次绑定到各个属性。
+
+2. 字符串字面值的联合`Keys`，其包含了那些要进行迭代的属性名称。
+
+3. 属性的结果类型（The resulting type of the property）。
+
+上面的示例中，`Keys`是一个硬编码的属性名称清单，同时属性类型全是`boolean`，那么此映射的类型就等价于下面的写法：
+
+```typescript
+type Flags = {
+    option1: boolean;
+    option2: boolean;
+}
+```
+
+但实际应用看起来会像上面的`Readonly`或`Partial`（Real applications, however, look like `Readonly` or `Partial` above）。它们总是基于一些既有类型，以某种方式对属性进行转换。那就是要用到`keyof`与受索引读写类型的地方：
+
+```typescript
+type NullablePerson = { [P in keyof Person]: Person[P] | null }
+type PartialPerson = { [P in keyof Person]?: Person[P] }
+```
+
+在这些示例中，属性清单为`keyof T`，结果类型是`T[P]`的某些变种。这可作为映射类型一般用法的良好模板。这是因为此类变换，是[同态的](https://en.wikipedia.org/wiki/Homomorphism)，也就是说，只是对于`T`的属性进行映射，而不涉及其它部分。编译器明白，在加入任何新东西前，其只能对所有既有属性修饰器进行拷贝（In these examples, the properties list is `keyof T` and the resulting type is come variant of `T[P]`. This is a good template for any general use of mapped types. That's because this kind of transformation is [homemorphic](https://en.wikipedia.org/wiki/Homomorphism), which means that the mapping applies only to properties of `T` and no others. The compiler knows that it can copy all the existing property modifiers before adding any new ones. For example, if `Person.name` was readonly, `Partial<Person>.name` would be readonly and optional）。比如，如果`Person.name`是只读的，那么`Partial<Person>.name`将是只读且可选的。
+
+下面是另一个示例，其中`T[P]`被封装在`Proxy<T>`类中：
+
+```typescript
+type Proxy<T> = {
+    get(): T;
+    set(value: T): void;
+}
+
+type Proxify<T> = {
+    [P in keyof T]: Proxy<T[P]>;
+}
+
+function proxify<T>(o: T): Proxify<T> {
+    // ... 这里封装了代理 ...
+}
+
+let proxyProps = proxify(props);
+```
+
 
