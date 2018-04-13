@@ -616,7 +616,7 @@ function area (s: Shape) {
 
 ## 多态`this`类型（Polymorphic `this` types）
 
-多态`this`类型，代表的是包含`this`的类或接口的一个 *子类型* 。这被称为F-边界多态。此特性好处在于，比如令到更易于表达层次化的流式接口。下面是一个在每次操作后都返回`this`的一个简单的计算器代码（A polymorphic `this` type represents a type that is the *subtype* of the containing class or interface. This is called F-bounded polymorphism. This makes hierarchical fluent interfaces much easier to express, for example. Take a simple calculator that return `this` after each operation）：
+多态`this`类型，代表的是包含`this`的类或接口的一个 *子类型* 。这被称为F-边界多态。此特性好处在于，比如令到更易于表达层次化的i **流式接口** 等。下面是一个在每次操作后都返回`this`的一个简单的计算器代码（A polymorphic `this` type represents a type that is the *subtype* of the containing class or interface. This is called F-bounded polymorphism. This makes hierarchical **fluent interfaces** much easier to express, for example. Take a simple calculator that return `this` after each operation）：
 
 ```typescript
 class BasicCalculator {
@@ -644,6 +644,73 @@ let v = new BasicCalculator (2)
             .multiply(5)
             .add(1)
             .currentValue();
+```
+
+因为类用到`this`类型，就可以将其扩展为新类型，且新类型可不加修改地使用要旧有的方法：
+
+```typescript
+class ScientificCalculator extends BasicCalculator {
+    public constructor ( value = 0 ) {
+        super ( value );
+    }
+
+    public sin () {
+        this value = Math.sin ( this.value );
+        return this;
+    }
+
+    // ... 其它的运算在这里 ...
+}
+
+let v = new ScientificCalculator (2)
+        .multiply(5)
+        .sin()
+        .add(1)
+        .currentValue();
+```
+
+如果没有`this`类型，`ScientificCalculator`就无法对`BasicCalculator`进行扩展并保留流式接口（the fluent interface）。`multiply`将返回`BasicCalculator`，而`BasicCalculator`是没有`sin`方法的。不过，在有了`this`类型后，`multiply`将返回`this`，就是这里的`ScientificCalculator`了。
+
+## 索引类型（Index types）
+
+使用索引类型特性，就可以让编译器对那些用到 **动态属性名称** 的代码进行检查。一种常见的JavaScript范式，就是从某个对象中拾取属性的子集（With index types, you can get the compiler to check code that uses **dynamic property names**. For example, a common JavaScript pattern is to pick a subset of properties from an object）：
+
+```typescript
+function pluck (o, names) {
+    return names.map( n => o[n] );
+}
+```
+
+下面是在TypeScript中上面函数的写法与用法，使用了 **索引类型查询** 与 **经索引的读写** 运算符（Here's how you would write and use this function in TypeScript, using the **index type query** and **indexed access** operators）：
+
+```typescript
+function pluck<T, K extends keyof T>(o: T, names: K[]): T[K][] {
+    return names.map(n => o[n]);
+}
+
+interface Person {
+    name: string;
+    age: number;
+}
+
+let person: Person = {
+    name: "Jirad",
+    age: 35
+}
+
+let strings = string[] = pluck ( person, ['name'] ); // 没有问题，string[]
+```
+
+编译器对`name`是`Person`上的属性进行检查。该示例引入了两个新的类型运算符（type operators）。首先是`keyof T`，也就是 **索引类型查询运算符**。对于任意类型的`T`，`keyof T`都是`T`的 **已知的、公开的属性名称的联合**（First is `keyof T`, the **index type query operator**. For any type `T`, `keyof T` is **the union of known, public names** of `T`）。比如：
+
+```typescript
+let personProps: keyof Person; // 'name' | `age`;
+```
+
+`keyof Person`与`'name' | 'age'`是可完全互换的。区别在于如给`Person`加上另一个属性，比如`address: string`，那么`keyof Person`将自动更新为`'name' | 'age' | 'address'`。同时可在如`pluck`函数这样的，提前并不知道有哪些属性名称的通用场合，使用`keyof`运算符。那意味着编译器将就是否传递了正确的属性名称集合给`pluck`进行检查：
+
+```typescript
+pluck ( person, ['age', 'unkown'] ); // 错误，'unkown' 不再 `'name' | 'age'` 属性名称联合中
 ```
 
 
