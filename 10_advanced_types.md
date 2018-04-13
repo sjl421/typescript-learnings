@@ -713,4 +713,20 @@ let personProps: keyof Person; // 'name' | `age`;
 pluck ( person, ['age', 'unkown'] ); // 错误，'unkown' 不再 `'name' | 'age'` 属性名称联合中
 ```
 
+引入的第二个运算符，就是`T[K]`，**受索引的读写运算符**（the **indexed access operator**）。这里的类型语法反映的是表达式语法（Here, **the type syntax** reflects **the expression syntax**）。那就是说`person['name']`具有类型`Person['name']` -- 在示例中那就仅是`string`。但与索引类型查询一样，可在通用环境中使用`T[K]`，这才是其与生俱来的威力。只需确保类型变量`K extends keyof T`即可。下面是另一个名为`getProperty`函数的示例：
+
+```typescript
+function getProperty<T, K extends keyof T>(o: T, name: K): T[K] {
+    return o[name]; // o[name] 的类型就是`T[K]`
+}
+```
+
+在函数`getProperty`中，`o: T` 与 `name: K`，就意味着`o[name]: T[K]`。一旦返回了`T[K]`结果，编辑器将立即实例化键的实际类型，因此`getProperty`函数的返回值类型，将根据所请求的属性，而有所不同。
+
+```typescript
+let name: string = getProperty(person, 'name');
+let age: number = getProperty(person, 'age');
+let unkown = getProperty(person, 'unknown'); // 错误，'unkown'不在 `'name' | 'age'`中
+```
+
 
