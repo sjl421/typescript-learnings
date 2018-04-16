@@ -845,4 +845,28 @@ type Record<K extends string, T> = {
 }
 ```
 
+`Readonly`、`Partial`与`Pick`是同态的，但`Record`却不是。`Record`不是同态的一个原因，就是其并不是取得一个要从其中拷贝属性的输入类型（One clue that `Record` is not homomorphic is that it doesn't take an input type to copy properties from）：
 
+```typescript
+type ThreeStringProps = Record<'prop1' | 'prop2' | 'prop3', string>
+```
+
+非同态类型，会创建新的属性，因此它们无法从任何地方拷贝属性修饰器（Non-homomorphic types are essentially creating new properties, so they can't copy property modifiers from anywhere）。
+
+### 自映射类型的推导（Inference from mapped types）
+
+现在以及知晓封装类型属性的方法，那么接着就要对这些类型属性进行解封装（Now that you know how to wrap the properties of a type, the next thing you'll want to do is unwrap them）。幸运的是，对类型属性的解封装，是相当容易的:
+
+```typescript
+function unproxify<T>(t: Proxify<T>): T {
+    let result = {} as T;
+
+    for ( const k in t ) {
+        result[k] = t[k].get();
+    }
+
+    return result;
+}
+```
+
+注意这种解封装推导仅适用于同态的映射类型。如映射类型不是同态的，就必须给解封装函数一个显式类型参数（Note that this unwrapping inference only works on homomorphic mapped types. If the mapped type is not homomorphic you'll have to give an explicit type parameter to your unwrapping function）。
