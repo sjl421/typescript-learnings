@@ -8,4 +8,6 @@ let obj = {
     key2: "value2"
 };
 
-console.log(key1);
+for (let s of key2) {
+    console.log(s)
+}
