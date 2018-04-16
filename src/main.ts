@@ -1,8 +1,11 @@
 'use strict';
-let x = () => ({name: "Alice"});
-let y = () => ({name: "Alice", location: "Seattle"});
+let key1 = Symbol("key1");
 
-x = y; // 没有问题
+let key2 = "key2";
 
+let obj = {
+    [key1]: "value1",
+    key2: "value2"
+};
 
-
+console.log(key1);
