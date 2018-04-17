@@ -1,13 +1,22 @@
 'use strict';
-let key1 = Symbol("key1");
+let list = ["4", "5", "6"]; 
 
-let key2 = "key2";
+for (let i in list) {
+    console.log(i); // "0", "1", "2"
+}
 
-let obj = {
-    [key1]: "value1",
-    key2: "value2"
-};
+for (let i of list) {
+    console.log(i); // "4", "5", "6"
+}
 
-for (let s of key2) {
-    console.log(s)
+let pets = new Set(["Cat", "Dog", "Hamster"]);
+
+pets["species"] = "mammals";
+
+for (let pet in pets) {
+    console.log(pet); // "species"
+}
+
+for (let pet of pets) {
+    console.log(pet); // "Cat", "Dog", "Hamster"
 }

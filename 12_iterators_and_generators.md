@@ -28,3 +28,55 @@ let list = [4, 5, 6];
 for (let i in list) {
     console.log(i); // "0", "1", "2"
 }
+
+for (let i of list) {
+    console.log(i); // "4", "5", "6"
+}
+```
+
+另一个区别就是`for..in`在任何对象上均可执行；它提供了一种探测对象上属性的方法。而`for..of`则主要关注的是可迭代对象的值。诸如`Map`及`Set`等实现了`Symbol.iterator`属性的内建对象，才允许对存储值的访问（Built-in objects like `Map` and `Set` implement `Symbol.iterator` property allowing access to stored values）。
+
+```typescript
+let pets = new Set(["Cat", "Dog", "Hamster"]);
+
+pets["species"] = "mammals";
+
+for (let pet in pets) {
+    console.log(pet); // "species"
+}
+
+for (let pet of pets) {
+    console.log(pet); // "Cat", "Dog", "Hamster"
+}
+```
+
+## 关于代码生成（Code generation）
+
+### 目标代码为ES5及ES3
+
+在生成目标代码为ES5或ES3时，只允许在`Array`类型上使用迭代器。就算非数组值实现了`Symbol.iterator`属性, 在它们上使用`for..of`循环都是错误的。
+
+编译器将为`for..of`循环生成一个简单的`for`循环，例如：
+
+```typescript
+let numbers = [1, 2, 3];
+
+for (let num of numbers) {
+    console.log(num);
+}
+```
+
+将生成如下代码：
+
+```javascript
+var numbers = [1, 2, 3];
+
+for (var _i = 0; _i < numbers.length; _i++) {
+    var num = numbers[_i];
+    console.log(_i);
+}
+```
+
+### 目标代码为ECMAScript2015或更高版本时
+
+在以兼容ECMAScript2015引擎为目标时，编译器将生成`for..of`循环，从而以引擎中的内建迭代器实现为目标。
