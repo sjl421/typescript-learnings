@@ -245,4 +245,87 @@ strings.forEach(s => {
 });
 ```
 
+## 模块的代码生成
+
+根据编译期间特定的目标模块，编译器将生成针对Node.js（CommonJS）、require.js（AMD）、[UMD](https://github.com/umdjs/umd)（Universal Module Definition API，通用模块定义接口）、[SystemJS](https://github.com/systemjs/systemjs)（启用在浏览器及NodeJS中动态ES模块工作流的，可配值模块加载器），或[ECMAScript 2015原生模块](http://www.ecma-international.org/ecma-262/6.0/#sec-modules)（ES6）的模块加载系统。可参考上述各个模块加载器文档，来进一步了解有关生成代码中`define`、`require`与`register`调用有什么作用。
+
+下面的简单示例，演示了在导入与导出期间所用到的名称，是如何被翻译到模块加载代码中去的。
+
+*SimpleModule.ts*
+
+```typescript
+import m = require("mod");
+export let t = m.something + 1;
+```
+
+*AMD/RequireJS 的 SimpleModule.js*
+
+```javascript
+define(["require", "exports", "./mod"], function(require, exports, mod_1) {
+    exports.t = mod_1.something + 1;
+});
+```
+
+*CommonJS/Node 的 SimpleModule.js*
+
+```javascript
+var mod_1 = require("./mod");
+exports.t = mod_1。something + 1;
+```
+
+*UMD de SimpleModule.js*
+
+```javascript
+(function (factory) {
+    if (typeof module === "object" && typeof module.exports === "object") {
+        var v = factory(require, exports);
+
+        if (v !== undefined) {
+            module.exports = v;
+        }
+    }
+    else if (typeof define === "function" && define.amd){
+        define(["require", "exports", "./mod"], factory);
+    }
+})(function(require, exports) {
+    var mod_1 = require("./mod");
+    exports.t = mod_1.something + 1;
+});
+```
+
+*SystemJS 的 SimpleModule.js*
+
+```javascript
+System.register(["./mod"], function(exports_1) {
+    var mod_1;
+    var t;
+    return {
+        setters: [
+            function (mod_1_1) {
+                mod_1 = mod_1_1;
+            }],
+        execute: function () {
+            exports_1("t", t = mod_1.something + 1);
+        }
+    }
+});
+```
+
+*原生ECMAScript 2015模块式的 SimpleModule.js*
+
+```javascript
+import { something } from "./mod"
+export var t = something + 1;
+```
+
+## 简单示例
+
+接下来将对先前示例中用到的验证器实现，综合为仅从各个模块导出单个的命名导出项（Below, we've consolidated the Validator implementations used in previous examples to only export a single named export from each module）。
+
+必须要在命令行指定模块编译的目标。对于Node.js，使用`--module commonjs`；对于require.js，使用`--module amd`。比如：
+
+```bash
+tsc --module commonjs Test.ts
+```
+
 

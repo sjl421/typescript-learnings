@@ -1,22 +1,15 @@
 'use strict';
-let list = ["4", "5", "6"]; 
 
-for (let i in list) {
-    console.log(i); // "0", "1", "2"
-}
+import zip = require("./ZipCodeValidator");
 
-for (let i of list) {
-    console.log(i); // "4", "5", "6"
-}
+// 一些要尝试的示例
+let strings = ["hello", "98052", "101"];
 
-let pets = new Set(["Cat", "Dog", "Hamster"]);
+// 要使用的验证器
+let validator = new zip();
 
-pets["species"] = "mammals";
+// 给出各个字符串是否通过各个验证器检查
+strings.forEach(s => {
+    console.log(`"${s}" - ${ validator.isAcceptable(s) ? " matches" : "does not match"}`);
+});
 
-for (let pet in pets) {
-    console.log(pet); // "species"
-}
-
-for (let pet of pets) {
-    console.log(pet); // "Cat", "Dog", "Hamster"
-}
