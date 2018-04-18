@@ -1,4 +1,5 @@
 'use strict';
+exports.__esModule = true;
 var numberRegexp = /^[0-9]+$/;
 var ZipCodeValidator = /** @class */ (function () {
     function ZipCodeValidator() {
@@ -8,4 +9,4 @@ var ZipCodeValidator = /** @class */ (function () {
     };
     return ZipCodeValidator;
 }());
-module.exports = ZipCodeValidator;
+exports.ZipCodeValidator = ZipCodeValidator;

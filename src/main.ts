@@ -1,15 +1,21 @@
 'use strict';
 
-import zip = require("./ZipCodeValidator");
+import { StringValidator } from "./Validation";
+import { ZipCodeValidator } from "./ZipCodeValidator";
+import { LettersOnlyValidator } from "./LettersOnlyValidator";
 
-// 一些要尝试的示例
-let strings = ["hello", "98052", "101"];
+// 一些测试样本
+let strings = ["Hello", "98052", "101"];
 
-// 要使用的验证器
-let validator = new zip();
+// 要用到的验证器
+let validators: { [s: string]: StringValidator; } = {};
 
-// 给出各个字符串是否通过各个验证器检查
+validators["ZIP code"] = new ZipCodeValidator();
+validators["Letters only"] = new LettersOnlyValidator();
+
+// 演示各个字符串是否通过各个验证器验证
 strings.forEach(s => {
-    console.log(`"${s}" - ${ validator.isAcceptable(s) ? " matches" : "does not match"}`);
+    for (let name in validators) {
+        console.log(`"${ s }" - ${ validators[name].isAcceptable(s) ? "matches": "does not match" } ${ name }`);
+    }
 });
-

@@ -328,4 +328,66 @@ export var t = something + 1;
 tsc --module commonjs Test.ts
 ```
 
+编译完成时，每个模块都将成为一个单独的`.js`文件。对于那些引用标签，编译器将跟随`import`语句对依赖文件进行编译（As with reference tags, the compiler will follow `import` statements to compile dependent files）。
+
+*Validation.ts*
+
+```typescript
+export interface StringValidator {
+    isAcceptable (s: string): boolean;
+}
+```
+
+*LettersOnlyValidator.ts*
+
+```typescript
+import { StringValidator } from "./Validation"
+
+const lettersRegexp = /^[A-Za-z]+$/;
+
+export class LettersOnlyValidator implements StringValidator {
+    isAcceptable (s: string) {
+        return lettersRegexp.test(s);
+    }
+}
+```
+
+*ZipCodeValidator.ts*
+
+```typescript
+import { StringValidator } from "./Validation";
+
+const numberRegexp = /^[0-9]+$/;
+
+export class ZipCodeValidator implements StringValidator {
+    isAcceptable (s: string) {
+        return s.length === 5 && numberRegexp.test(s);
+    }
+}
+```
+
+*Test.ts*
+
+```typescript
+import { StringValidator } from "./Validation";
+import { ZipCodeValidator } from "./ZipCodeValidator";
+import { LettersOnlyValidator } from "./LettersOnlyValidator";
+
+// 一些测试样本
+let strings = ["Hello", "98052", "101"];
+
+// 要用到的验证器
+let validators: { [s: string]: StringValidator; } = {};
+
+validators["ZIP code"] = new ZipCodeValidator();
+validators["Letters only"] = new LettersOnlyValidator();
+
+// 演示各个字符串是否通过各个验证器验证
+strings.forEach(s => {
+    for (let name in validators) {
+        console.log(`"${ s }" - ${ validators[name].isAcceptable(s) ? "matches": "does not match" } ${ name }`);
+    }
+});
+```
+
 
