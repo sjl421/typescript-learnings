@@ -390,4 +390,145 @@ strings.forEach(s => {
 });
 ```
 
+## 可选的模块加载与其它复杂加载场景（Optional Module Loading and Other Advanced Loading Scenarios）
+
+在一些案例中，可能打算仅在部分情况下才装入某个模块（In some cases, you may want to only load a module under some condition）。TypeScript中可使用下面所给出的模式，实现这种或其它复杂加载场景，以在不损失类型安全的前提下，实现模块加载器的直接调用。
+
+编译器对各个模块在生成的JavaScript中是否用到进行探测。如果某个模块识别符仅作为类型注记的部分被用到，而没有作为表达式用到，那么对那个模块就不会生成`require`调用（If a module identifier is only ever used as part of a type annotations and never as an expression, then no `require` call is emitted for that module）。这种对未使用引用的省略，是一种良好的性能优化，同时也允许这些模块的可选加载。
+
+该模式的核心理念, 就是`import id = require("...")`语句给予了对该模块所暴露出的类型的访问（The core idea of the pattern is that the `import id = require("...")` statement gives us access to the types exposed by the module）。如下面所给出的`if`块一样，该模块加载器是动态触发的（通过`require`）。此特性利用了引用省略优化（the reference-elision optimization），因此仅在需要该模块时才进行加载。此模式要生效，就在于通过`import`所定义的符号，在类型位置处用到（即是，绝不能在将会生成到JavaScript中的位置用到）。
+
+可使用`typeof`关键字，来维护类型安全。在某个类型位置出使用`typeof`关键字时，将产生某个值的类型，在该模式的情况下，就是模块的类型。
+
+*Node.js 中的动态模块加载*
+
+```typescript
+declare function require(moduleName: string): any;
+
+import { ZipCodeValidator as Zip } from "./ZipCodeValidator";
+
+if ( needZipValidation ) {
+    let ZipCodeValidator: typeof Zip = require("./ZipCodeValidator");
+    let validator = new ZipCodeValidator();
+    if (validator.isAcceptable("...")) { /* ... */ }
+}
+```
+
+*示例： require.js中的动态模块加载*
+
+```typescript
+declare function require(moduleName: string[], onLoad: (...args: any[]) => void): void;
+
+import * as Zip from "./ZipCodeValidator";
+
+if (needZipValidation) {
+    require(["./ZipCodeValidator"], (ZipCodeValidator: typeof Zip) => {
+        let validator = new ZipCodeValidator.ZipCodeValidator();
+        if (validator.isAcceptable("...")) { /* ... */ }
+    });
+}
+```
+
+## 与别的JavaScript库打交道（Working with Other JavaScript Libraries）
+
+需要对库所暴露出的API进行声明，以描述那些不是用TypeScript编写的库的形状（To describe the shape of libraries not written in Typescript, we need to declare the API that the library exposes）。
+
+对于那些并未定义某种实现的声明，将其成为“外围”（We call delarations that don't define an implementation "ambient"）。这些声明通常都是在`.d.ts`文件中定义的。如属性C/C++语言，那么这些文件可被看作是`.h`文件。来看看下面这些示例。
+
+### 外围模块（Ambient Modules）
+
+Node.js中的大多数任务，都是通过加载一个或多个模块完成的。尽管可将各个模块定义在其自己的、带有顶层导出声明的`.d.ts`文件中，不过将这些模块作为一个较大的`.d.ts`文件进行编写，则会更方便。做法就是使用一个类似与外围命名空间的结构，实际上使用`module`关键字，与在随后的导入中可以使用的模块引用名称（To do so, we use a construct similar to ambient namespaces, but we use the `module` keyword and the quoted name of the module which will be available to a later import）。比如：
+
+*node.d.ts (简化摘要)*
+
+```typescript
+declare module "url" {
+    export interface Url {
+        protocol?: string;
+        hostname?: string;
+        pathname?: string;
+    }
+
+    export function parse(urlStr: string, parseQueryString?, slashesDenoteHost?): Url;
+}
+
+declare module "path" {
+    export function nomarlize(p: string): string;
+    export function join(...paths: any[]): string;
+    export var sep: string;
+}
+```
+
+现在就可以 `/// <reference> node.d.ts` 并使用`import url = require("url");` 或 `import * as URL from "url"`来装入模块了。
+
+```typescript
+/// <reference path="node.d.ts"/>
+
+import * as URL from "url";
+let myUrl = URL.parse("http://www.typescriptlang.org");
+```
+
+### 速记式外围模块（Shorthand ambient modules）
+
+在不打算于使用某个新模块之前花时间编写其声明时，就可使用速记式声明特性（a shorthand declaration），以快速开工（If you don't want to take the time to write out declarations before using a new module, you can use a shorthand declaration to get started quickly）。
+
+*declarations.d.ts*
+
+```typescript
+declare module "hot-new-module";
+```
+
+来自速记模块的所有导入，都将具有`any`类型。
+
+```typescript
+import x, {y} from "hot-new-module";
+x(y);
+```
+
+### 通配符式模块声明（Wildcard module declarations）
+
+一些诸如`SystemJS`及`AMD`的模块加载器允许导入非JavaScript内容（Some module loaders such as SystemJS and AMD allow non-JavaScript content to be imported）。这些模块加载器通常使用前缀或后缀（a prefix or suffix）来表明特殊加载的语义。通配符式模块声明就可用来满足这些情况。
+
+```typescript
+declare module "*!text" {
+    const content: string;
+    export default content;
+}
+
+// 反过来的做法
+declare module "json!*" {
+    const value: any;
+    export default value;
+}
+```
+
+现在就可以导入与`"*!text"`或`json!*`匹配的模块了。
+
+```typescript
+import fileContent from "./xyz.txt!text";
+import data from "json!http://example.com/data.json";
+
+console.log(data, fileContent);
+```
+
+### UMD模块（UMD Modules）
+
+一些库被设计为可在多种模块加载器中使用，或是不带有模块加载功能（它们采用全局变量）。这些就是所说的UMD模块。这类库的访问，是通过导入或全局变量进行的。比如：
+
+*math-lib.d.ts*
+
+```typescript
+export function isPrime (x: number): boolean;
+export as namespace mathLib;
+```
+
+随后该库便可作为模块内的一个导入进行使用了：
+
+```typescript
+import { isPrime } from "math-lib";
+
+isPrime(2);
+mathLib.isPrime(2); // 错误：在模块内部不能使用全局定义
+```
+
 
