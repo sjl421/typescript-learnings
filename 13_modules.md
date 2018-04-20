@@ -531,4 +531,235 @@ isPrime(2);
 mathLib.isPrime(2); // 错误：在模块内部不能使用全局定义
 ```
 
+其也可以作为一个全局变量使用，但仅限于在脚本内部（脚本是不带有导入与导出的文件）。
+
+```typescript
+mathLib.isPrime(2);
+```
+
+## 模块如何组织的守则（Guidance for structuring modules）
+
+***尽可能在顶层进行导入（Export as close to top-level as possible）***
+
+模块消费者在使用导入的模块时，摩擦应尽可能少。加入过多层次的嵌套将导致低效，因此在打算如何组织模块上应深思熟虑（Consumers of your module should have as little friction as possible when using things that you export. Adding too many levels of nesting tends to be cumbersome, so think carefully about how you want to structure things）。
+
+从模块导出命名空间，就是加入过多层数嵌套的一个示例。虽然命名空间有时有其用处，但在使用模块时它们也加入了一层额外的非直接因素。这种做法很快会变为用户的痛点，同时通常是不必要的。
+
+导出类上的静态方法，有着类似问题 -- 类本身加入了一层嵌套。除非这么做提升表现力或有某种明确有用形式的意图，那么就考虑简单地导出一个辅助函数（a helper function）。
+
+***如仅导出单个的`class` 或 `function`，那么请使用`export default`***
+
+与`靠近顶层导出`一样，默认导出项的使用，也能减少模块消费者上的摩擦（Just as "exporting near the top-level" reduces friction on your module's consumers, so does introducing a default export）。在模块的主要目的是存放一个特定的导出时，就应考虑将其作为默认导出项进行导出。这样做令到导入与导入项的使用更为容易一些。比如：
+
+*MyClass.ts*
+
+```typescript
+export default class SomeType {
+    constructor () { ... }
+}
+```
+
+*MyFunc.ts*
+
+```typescript
+export default function getThing() { return "thing"; }
+```
+
+*Consumer.ts*
+
+```typescript
+import t from "./MyClass";
+import f from "./MyFunc";
+
+let x = new t();
+console.log(f());
+```
+
+对于模块消费者，这是可选的。它们可将类型命名为它们想要的任何名字（这里的`t`），并不需要任何过度过度点缀来找到对象（They can name your type whatever they want(`t` in this case) and don't have to do any excessive dotting to find your objects）。
+
+***如要导出多个对象，那么将它们一起放在顶层***
+
+*MyThings.ts*
+
+```typescript
+export class SomeType { /* ... */ }
+export function someFunc () { /* ... */ }
+```
+
+相反，在导入时应注意以下规则：
+
+***显式地列出所导入的名称（Explicitly list imported names）***
+
+*Consumer.ts*
+
+```typescript
+import { SomeType, someFunc } from "./MyThings";
+
+let x = new SomeType();
+let y = someFunc();
+```
+
+***使用命名空间导入模式，来导入较多的对象（Use the namespace import pattern if you're importing a large number of things）***
+
+*MyLargeModule.ts*
+
+```typescript
+export class Dog { ... }
+export class Cat { ... }
+export class Tree { ... }
+export class Flower { ... }
+```
+
+*Consumer.ts*
+
+```typescript
+import * as myLargeModule from "./MyLargeModule.ts";
+let x = new myLargeModule.Dog();
+```
+
+### 再导出以进行扩展（Re-export to extend）
+
+通常需要在某个模块上进行功能扩展。一种常见的JS模式就是使用 *扩展* 来增加原始对象，这与JQuery的扩展原理类似。如同先前提到的，模块并不会像全局命名空间对象那样 *融合*。因此推荐的做法是 *不要* 改动原始对象，而是导出一个提供新功能的新实体（A common JS pattern is to augment the original object with *extensions*, similar to how JQuery extensions work. As we've mentioned before, modules do not *merge* like global namespace objects would. The recommended solution is to *not* mutate the original object, but rather export a new entity that provides the new functionality）。
+
+考虑下面这个定义在模块`Calculator.ts`中简单的计算器实现。该模块还导出了一个通过传入输入字符串清单，并在最后写出结果的，用于对计算器进行功能测试的辅助函数。
+
+*Calculator.ts*
+
+```typescript
+export class Calculator {
+    private current = 0;
+    private memory = 0;
+    private operator: string;
+
+    protected processDigit (digit: string, currentValue: number) {
+        if (digit >= "0" && digit <= "9") {
+            return currentValue * 10 + (digit.charCodeAt(0) - "0".charCodeAt(0));
+        }
+    }
+
+    protected processOperator (operator: string) {
+        if (["+", "-", "*", "/"].indexOf(operator) >= 0) {
+            return operator;
+        }
+    }
+
+    protected evaluateOperator (operator: string, left: number, right: number): number {
+        switch (this.operator) {
+            case "+": return left + right;
+            case "-": return left - right;
+            case "*": return left * right;
+            case "/": return left / right;
+        }
+    }
+
+    private evaluate () {
+        if (this.operator) {
+            this.memory = this.evaluateOperator(this.operator, this.memory, this.current);
+        }
+        else {
+            this.memory = this.current;
+        }
+        this.current = 0;
+    }
+
+    public handelChar (char: string) {
+        if (char === "=") {
+            this.evaluate();
+            return;
+        }
+        else {
+            let value = this.processDigit(char, this.current);
+
+            if (value !== undefined) {
+                this.current = value;
+                return;
+            }
+            else {
+                let value = this.processOperator(char);
+
+                if (value !== undefined) {
+                    this.evaluate();
+                    this.operator = value;
+                    return;
+                }
+            }
+        }
+
+        throw new Error(`Unsupported input: '${char}'`);
+    }
+
+    public getResult() {
+        return this.memory;
+    }
+}
+
+export function test (c: Calculator, input: string) {
+    for (let i = 0; i < input.length; i++){
+        c.handelChar(input[i]);
+    }
+
+    console.log(`result of '${input}' is '${c.getResult()}'`);
+}
+```
+
+下面是使用所暴露出来的`test`函数的一个计算器的简单测试。
+
+*TestCalculator.ts*
+
+```typescript
+import { Calculator, test } from "./Calculator";
+
+let c = new Calculator;
+test(c, "1+2*33/11=");
+```
+
+接着将其扩展到加入对其它进制的支持，来创建`ProgrammerCalculator.ts`吧。
+
+*ProgrammerCalculator.ts*
+
+```typescript
+import { Calculator } from "./Calculator";
+
+class ProgrammerCalculator extends Calculator {
+    static digits = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"];
+
+    constructor (public base: number) {
+        super();
+
+        if (base <= 0 || base > ProgrammerCalculator.digits.length) {
+            throw new Error("基数必须要在0到16的范围");
+        }
+    }
+
+    protected processDigit(digit: string, currentValue: number) {
+        if (Programmercalculator.digits.indexOf(digit) >= 0) {
+            return currentValue * this.base + ProgrammerCalculator.digits.indexOf(digit);
+        }
+    }
+}
+
+// 将新的已扩展的计算器作为`Calculator`进行导出
+export { ProgrammerCalculator as Calculator };
+
+// 还要导出辅助函数
+export { test } from "./Calculator";
+```
+
+新的`ProgrammerCalculator`模块导出了一个与原始的`Calculator`模块类似的API外形，但并没有对原始模块中的任何对象进行修改。下面是对`ProgrammerCalculator`类的测试：
+
+*TestProgrammerCalculator.ts*
+
+```typescript
+import { Calculator, test } from "./ProgrammerCalculator";
+
+let c = new Calculator(2);
+test(c, "001+010=");
+```
+
+### 不要在模块中使用命名空间（Do not use namespaces in modules）
+
+在初次迁移到基于模块的组织形式时，常见的倾向就是将导出项封装到一个额外的命名空间层中（When first moving to a module-based organization, a common tendency is to wrap exports in an additional layer of namespaces）。模块有着其自己的作用域，同时仅有导出的声明是从模块外部可见的。记住了这一点，就明白在使用模块时，命名空间所提供到的价值就是很有限的。
+
+在组织方式前，对于将逻辑上有联系的对象与类型，在全局作用域中进行分组，命名空间是很好用的。比如在C#中，就能在`System.Collections`找到所有的集合类型。通过将类型组织到层次化的命名空间，就能为这些类型的用户提到到良好的“发现”体验。但是模块本身必然已经文件系统中有所呈现。必须通过路径与文件名来解析这些模块，因此已经有了一套可使用的逻辑组织方案。比如可有着一个包含了清单模块的`/collections/generic/`文件夹（On the organization front, namespaces are handy for grouping together logically-related objects and types in the global scope. For example, in C#, you're going to find all the collection types in `System.Collections`. By organizing our types into hierarchical namespaces, we provide a good "discovery" experience for users of those types. Modules, on the other hand, are already present in a file system, necessarily. We have to resolve them by path and filename, so there's a logical organization scheme for us to use. We can have a `/collections/generic` folder with a list module in it）。
+
 
