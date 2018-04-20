@@ -762,4 +762,16 @@ test(c, "001+010=");
 
 在组织方式前，对于将逻辑上有联系的对象与类型，在全局作用域中进行分组，命名空间是很好用的。比如在C#中，就能在`System.Collections`找到所有的集合类型。通过将类型组织到层次化的命名空间，就能为这些类型的用户提到到良好的“发现”体验。但是模块本身必然已经文件系统中有所呈现。必须通过路径与文件名来解析这些模块，因此已经有了一套可使用的逻辑组织方案。比如可有着一个包含了清单模块的`/collections/generic/`文件夹（On the organization front, namespaces are handy for grouping together logically-related objects and types in the global scope. For example, in C#, you're going to find all the collection types in `System.Collections`. By organizing our types into hierarchical namespaces, we provide a good "discovery" experience for users of those types. Modules, on the other hand, are already present in a file system, necessarily. We have to resolve them by path and filename, so there's a logical organization scheme for us to use. We can have a `/collections/generic` folder with a list module in it）。
 
+命名空间特性要注意避免全局作用域下的命名冲突。比如可能存在`My.Application.Customer.AddForm`与`My.Application.Order.AddForm`两个有着同样名称而不在同一命名空间的类型。这在模块中却不成问题。在模块中，并没有要让两个对象使用相同名称的不明原因。而从消费侧来看，任何给定模块的消费者有自主选取它们用于引用该模块的名称的权力，因此偶发的命名冲突是不可能出现的（Namespaces are important to avoid naming collisions in the global scope. For example, you might have `My.Application.Customer.AddForm` and `My.Application.Order.AddForm` -- two types with the same name, but a different namespace. This, however, is not an issue with modules. Within a module, there's no plausible reason to have two objects with the same name. From the comsumption side, the consumer of any given modules gets to pick the name that they will use to refer to the modules, so accidental naming conflicts are impossible）。
 
+> 关于模块与命名空间的更多讨论，请参考[命名空间与模块](15_namespaces_and_modules.md)小节。
+
+## 避免事项（Red Flags）
+
+所有下面列出的，都是模块组织中需要避免的。在文件中有下面之一时，对要两次检查没有试着将外部模块进行命名空间操作（All of the following are red flags for module structuring. Double-check that you're not trying to namespace your external modules if any of these apply to your files）。
+
++ 仅有一个顶层声明，且为`export namespace Foo { ... }`的文件（移除`Foo`并将所有内容进行提升，A file whose only top-level declaration is `export namespace Foo { ... }` (remove `Foo` and move everything 'up' level)）
+
++ 仅有单个的`export class`或`export function`的文件（请考虑使用`export default`）
+
++ 有着相同位处顶层的`export namespace Foo {`的多个文件（一定不要认为它们会结合到同一个`Foo`中去，Multiple files that have the same `export namespace Foo {` at top-level(don't think that these are going to combine into one `Foo`!)）
