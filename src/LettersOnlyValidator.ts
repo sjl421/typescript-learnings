@@ -1,11 +1,12 @@
 'use strict';
 
-import { StringValidator } from "./Validation"
+/// <reference path="Validation.ts">
+namespace Validation {
+    const lettersRegexp = /^[A-Za-z]+$/;
 
-const lettersRegexp = /^[A-Za-z]+$/;
-
-export class LettersOnlyValidator implements StringValidator {
-    isAcceptable (s: string) {
-        return lettersRegexp.test(s);
+    export class LettersOnlyValidator implements StringValidator {
+        isAcceptable (s: string) {
+            return lettersRegexp.test(s);
+        }
     }
 }
