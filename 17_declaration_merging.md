@@ -197,3 +197,100 @@ namespace buildLabel {
 alert(buildLabel("Sam Smith"));
 ```
 
+于此类似，命名空间也可用于对带有静态成员的枚举进行扩展：
+
+```typescript
+enum Color {
+    red = 1,
+    green = 2,
+    blue = 4
+}
+
+namespace Color {
+    export function mixColor (colorName: string) {
+        if (colorName === "yellow") {
+            return Color.red + Color.green;
+        }
+        else if (colorName === "white") {
+            return Color.red + Color.green + Color.blue;
+        }
+        else if (colorName === "magenta") {
+            return Color.red + Color.blue;
+        }
+        else if (colorName === "cyan") {
+            return Color.green + Color.blue;
+        }
+    }
+}
+```
+
+## 不允许的融合（Diallowed Merges）
+
+TypeScript中并非所有融合都是允许的。目前，类就被允许与其它类或变量融合。有关对类融合的模仿，请参考[TypeScript中的混入](20_mixins.md)章节。
+
+## 模块增强（Module Augmentation）
+
+尽管JavaScript模块并不支持融合，但可通过导入并随后对其进行更新，来对既有对象进行补充（Although JavaScript modules do not support merging, you can patch existing objects by importing and then updating them）。看看下面这个`Observable`的示例：
+
+```typescript
+// observable.js
+export class Observable<T> {
+    // ... 实现由读者作为练习完成 ...
+}
+
+// map.js
+import { Observable } from "./observable";
+
+Observable.prototype.map = function (f) {
+    // ... 作为读者的另一个练习
+}
+```
+
+这种做法在TypeScript中也是可行的，不过编译器并不知道`Observable.prototype.map`。这里就可以使用模块增强特性，来将其告诉编译器：
+
+```typescript
+// observable.ts 保持不变
+// map.ts
+import { Observable } from "./observable";
+
+declare module "./observable" {
+    interface Observable<T> {
+        map(U)(f: (x: T) => U): Observable<U>;
+    }
+}
+
+Observable.prototype.map = function (f) {
+    // ... 留给读者的另一个练习
+}
+
+// consumer.ts
+import { Observable } from "./observable";
+import "./map";
+
+let o: Observable<number>;
+
+o.map(x => x.toFixed());
+```
+
+### 全局增强（Global augmentation）
+
+亦可从某个模块内部，将声明添加到全局作用域（You can also add declarations to the global scope from inside a module）。
+
+```typescript
+// observable.ts
+export class Observable<T> {
+    // ... 仍旧没有实现 ...
+}
+
+declare global {
+    interface Array<T> {
+        toObservable(): Observable<T>;
+    }
+}
+
+Array.prototype.toObservable = function () {
+    // ...
+}
+```
+
+全局增强与模块增强，有着同样的行为和限制（Global augmentations have the same behavior and limits as module augmentations）。
