@@ -121,5 +121,12 @@ f(): called
 
 ### 装饰器求值（Decorator Evaluation）
 
+对于装饰器如何应用到类内部的各种声明，有着以下可遵循的定义良好的顺序：
 
+1. 对于各个实例成员， *参数装饰器*，接着分别是 *方法*、*访问器* 或者 *属性装饰器* 将被应用（ *Parameter Decorators*, followed by *Method*, *Accessor*, or *Property Decorators* are applied for each instance member）。
 
+2. 对于各个静态成员， *参数装饰器*，接着分别是 *方法*、*访问器* 或者 *属性装饰器* 将被应用（ *Parameter Decorators*, followed by *Method*, *Accessor*, or *Property Decorators* are applied for each static member）。
+
+3. 对于构造器，将应用参数装饰器（ *Parameter Decorators* are applied for the constructor）。
+
+4. 
