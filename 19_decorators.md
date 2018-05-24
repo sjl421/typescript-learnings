@@ -121,7 +121,7 @@ f(): called
 
 ### 装饰器求值（Decorator Evaluation）
 
-对于装饰器如何应用到类内部的各种声明，有着以下可遵循的定义良好的顺序：
+对于将装饰器如何应用到类内部的各种声明，有着以下可遵循的定义良好的顺序：
 
 1. 对于各个实例成员， *参数装饰器*，接着分别是 *方法*、*访问器* 或者 *属性装饰器* 将被应用（ *Parameter Decorators*, followed by *Method*, *Accessor*, or *Property Decorators* are applied for each instance member）。
 
@@ -129,4 +129,35 @@ f(): called
 
 3. 对于构造器，将应用参数装饰器（ *Parameter Decorators* are applied for the constructor）。
 
-4. 
+4. 对于类，将应用 *类装饰器* （ *Class Decorators* are applied for the class ）。
+
+### 类装饰器
+
+*类装饰器* 是在类声明之前、紧接着类声明处声明的。类声明作用与类的构造器，而可用于对类的定义进行观察、修改或替换。类装饰器不能在声明文件，或任何其它外围上下文中使用（比如在某个`declare`类上。The class decorator is applied to the constructor of the class and can be used to observe, modify or replace a class definition. A class decorator cannot be used in a declaration file, or in any other ambient context(such as on a `declare` class)）。
+
+> 什么是TypeScript的外围上下文（ambient context, 有的翻译为“已有环境”）?
+    > 
+    >
+
+类装饰器的表达式，将被作为一个函数，在运行时以被装饰的类的构造器函数，作为唯一参数而被调用。
+
+> **注意** 应注意返回一个新的构造器函数，因为必须注意维护好原来的原型。运行时对装饰器的应用这一逻辑，并不会做这件事（Should you chose to return a new constructor function, you must take care to maintain the original prototype. The logic that applies decorators at runtime will not do this for you）。
+
+下面是一个应用到`Greeter`类的类装饰器（`@sealed`）的示例：
+
+```typescript
+@sealed
+class Greeter {
+    greeting: string;
+
+    constructor(message: string) {
+        this.greeting = message;
+    }
+
+    greeter () {
+        return `Hello, { this.greeting }`;
+    }
+}
+```
+
+
