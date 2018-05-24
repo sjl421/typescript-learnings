@@ -133,7 +133,7 @@ f(): called
 
 ### 类装饰器
 
-*类装饰器* 是在类声明之前、紧接着类声明处声明的。类声明作用与类的构造器，而可用于对类的定义进行观察、修改或替换。类装饰器不能在声明文件，或任何其它外围上下文中使用（比如在某个`declare`类上。The class decorator is applied to the constructor of the class and can be used to observe, modify or replace a class definition. A class decorator cannot be used in a declaration file, or in any other ambient context(such as on a `declare` class)）。
+*类装饰器* 是在类声明之前、紧接着类声明处使用的。类声明作用与类的构造器，而可用于对类的定义进行观察、修改或替换。类装饰器不能在声明文件，或任何其它外围上下文中使用（比如在某个`declare`类上。The class decorator is applied to the constructor of the class and can be used to observe, modify or replace a class definition. A class decorator cannot be used in a declaration file, or in any other ambient context(such as on a `declare` class)）。
 
 > 什么是TypeScript的外围上下文（ambient context, 有的翻译为“已有环境”）?
     > 
@@ -160,4 +160,48 @@ class Greeter {
 }
 ```
 
+可将`@sealed`装饰器定义为使用下面的函数声明：
 
+```typescript
+function sealed(constructor: Function) {
+    Object.seal(constructor);
+    Object.seal(constructor.prototype);
+}
+```
+
+在`@sealed`装饰器（于运行时）被执行后，它将同时封闭构造器及其原型。
+
+接着的是一个如何覆写构造器的示例：
+
+```typescript
+function classDecorator<T extends {new( ...args: any[] ): {}}>(constructor: T) {
+    return class extends constructor {
+        newProperty = "new property";
+        hello = "override";
+    }
+}
+
+@classDecorator
+class Greeter {
+    property = "property";
+    hello: string;
+
+    constructor(m: string) {
+        this.hello = m;
+    }
+}
+
+console.log(new Greeter("world"));
+```
+
+### 方法装饰器（Method Decorators）
+
+*方法装饰器* 是在某个方法声明之前、紧接着该方法处使用的。此种装饰器被应用到方法的 *属性描述符* ，而可用于对方法定义进行观察、修改或替换。不能在定义文件、过载或任何其它已有上下文中（比如某个`declare`类中）使用方法装饰器（The decorator is applied to the *Property Descriptor* for the method, and can be used to observe, modify, or replace a method definition. A method decorator cannot be used in a declaration file, on an overload, or in any other ambient context(such as in a `declare` class)）。
+
+方法装饰器的表达式，将在运行时作为函数，以下面的三个参数进行调用：
+
+1. 静态成员的类构造函数，或实例成员的类的原型（Either the constructor function of the class for a static member, or the prototype of the class for an instance member, ）。
+
+> 关于静态成员与实例成员的区别：
+    > 前面所说的都是对于类的实例成员，在实例化后的对象才会起作用。可以使用static定义类中的静态成员，所有实例可以使用this中的名称来访问静态成员。 
+    > [TypeScript笔记](http://yrq110.me/2018/01/06/20180106-typescript-note/)

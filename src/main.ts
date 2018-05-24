@@ -13,10 +13,6 @@ class Greeter {
     constructor(m: string) {
         this.hello = m;
     }
-    
-    greeter () {
-        return `Hello, { this.greeting }`;
-    }
 }
 
 console.log(new Greeter("world"));
